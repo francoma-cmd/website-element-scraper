@@ -1,0 +1,13 @@
+.DS_Store
+node_modules/
+dist/
+playwright-report/
+trace.zip
+*.log
+
+# Electron
+out/
+release/
+
+# OS
+Thumbs.db

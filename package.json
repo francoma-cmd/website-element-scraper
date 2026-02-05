@@ -1,0 +1,60 @@
+{
+  "name": "website-element-scraper",
+  "version": "1.0.0",
+  "private": true,
+  "main": "main.js",
+  "description": "Desktop app to scrape website element details and export CSV.",
+  "scripts": {
+    "start": "electron .",
+    "postinstall": "node scripts/install-browsers.js",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "dependencies": {
+    "playwright": "^1.50.0"
+  },
+  "devDependencies": {
+    "electron": "^31.2.1",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.scrape.desktop",
+    "productName": "Website Element Scraper",
+    "asar": true,
+    "files": [
+      "index.html",
+      "main.js",
+      "preload.js",
+      "assets",
+      "node_modules/**",
+      "!node_modules/**/test/**",
+      "!node_modules/**/tests/**",
+      "!node_modules/**/docs/**",
+      "!node_modules/**/doc/**",
+      "!node_modules/**/example/**",
+      "!node_modules/**/examples/**",
+      "!node_modules/**/coverage/**",
+      "!node_modules/**/.bin/**",
+      "!node_modules/**/CHANGELOG*",
+      "!node_modules/**/README*",
+      "!node_modules/**/readme*",
+      "!node_modules/**/LICENSE*",
+      "!node_modules/**/license*"
+    ],
+    "extraResources": [
+      "node_modules/playwright/.local-browsers"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.productivity",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "identity": null
+    }
+  }
+}

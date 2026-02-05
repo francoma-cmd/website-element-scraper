@@ -1,0 +1,1113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Website Element Scraper</title>
+  <style>
+    :root {
+      --bg: #130b1b;
+      --panel: #21112f;
+      --panel-2: #2a1840;
+      --panel-3: #1b1029;
+      --ink: #f7f2ff;
+      --muted: #c6b4df;
+      --accent: #9b5cff;
+      --accent-2: #ff6fb1;
+      --line: #3a2a52;
+      --line-strong: #4c376c;
+      --shadow: 0 18px 40px rgba(12, 6, 20, 0.45);
+      --glow: 0 0 0 3px rgba(155, 92, 255, 0.28);
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(900px 540px at 5% -5%, rgba(155, 92, 255, 0.35) 0%, rgba(155, 92, 255, 0) 65%),
+        radial-gradient(900px 540px at 100% 0%, rgba(255, 111, 177, 0.25) 0%, rgba(255, 111, 177, 0) 70%),
+        var(--bg);
+      color: var(--ink);
+      font-family: "IBM Plex Sans", "Space Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 32px auto 64px;
+      padding: 0 20px;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-family: "IBM Plex Serif", "Georgia", serif;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+      margin: 0;
+      font-size: clamp(28px, 3.5vw, 36px);
+    }
+
+    .sub {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 6px 0 0;
+    }
+
+    .panel-section {
+      background: var(--panel-3);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .label-title {
+      text-transform: none;
+      letter-spacing: 0.02em;
+    }
+
+    textarea,
+    input,
+    select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      background: var(--panel-2);
+      color: var(--ink);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    textarea:focus,
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: var(--glow);
+      background: #2f1e46;
+    }
+
+    textarea { min-height: 160px; resize: vertical; }
+
+    .row {
+      display: grid;
+      grid-template-columns: minmax(160px, 1.2fr) minmax(220px, 2.3fr) minmax(120px, 0.9fr) minmax(140px, 1fr) 32px;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 6px 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: #27173b;
+    }
+
+    .row input,
+    .row select {
+      min-width: 0;
+      font-size: 13px;
+    }
+
+    .row input {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .target-selector,
+    .target-attr {
+      font-family: "IBM Plex Mono", "Menlo", "Monaco", monospace;
+    }
+
+    .row .remove {
+      border: none;
+      background: rgba(255, 111, 177, 0.18);
+      color: var(--accent-2);
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .actions.sticky {
+      position: sticky;
+      bottom: 12px;
+      background: linear-gradient(180deg, rgba(27, 16, 41, 0), rgba(27, 16, 41, 0.75) 40%, rgba(27, 16, 41, 0.95) 100%);
+      padding-top: 12px;
+      z-index: 2;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .checkbox-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .checkbox-row input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
+    button {
+      border: none;
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(15, 23, 32, 0.12);
+    }
+
+    .primary {
+      background: linear-gradient(135deg, #8b5cf6, #ff6fb1);
+      color: #fff;
+    }
+
+    .secondary {
+      background: #2b193f;
+      color: var(--ink);
+    }
+
+    .note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      background: #2a1840;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 13px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .status {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 8px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: #241635;
+      height: 140px;
+      min-height: 140px;
+      max-height: 140px;
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 12px;
+      table-layout: fixed;
+      min-width: 920px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 6px 10px;
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.25;
+      word-break: break-word;
+      min-width: 120px;
+      max-width: 360px;
+    }
+
+    th:first-child,
+    td:first-child {
+      width: 320px;
+      min-width: 320px;
+    }
+
+    .cell {
+      display: -webkit-box;
+      -webkit-line-clamp: 5;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      max-height: calc(1.25em * 5);
+    }
+
+    td a.cell {
+      color: #ffd1f1;
+      text-decoration: none;
+    }
+
+    td a.cell:hover {
+      text-decoration: underline;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #26183a;
+      z-index: 1;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .table-wrap {
+      max-height: 360px;
+      overflow: auto;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: #241635;
+    }
+
+    .targets-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .targets-header label {
+      margin: 0;
+    }
+
+    .targets-list {
+      height: 100%;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .log-panel {
+      display: grid;
+      grid-template-rows: auto 140px auto auto;
+      gap: 10px;
+    }
+
+    .log-panel .status {
+      margin-top: 0;
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: #221330;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .preset-bar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+      align-items: end;
+    }
+
+    .preset-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .preset-actions input {
+      min-width: 160px;
+    }
+
+    .ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--line);
+    }
+
+
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+      .row {
+        grid-template-columns: 1fr 1fr 1fr 1fr 32px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .row {
+        grid-template-columns: 1fr;
+      }
+      .row .remove { justify-self: end; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Website Element Scraper</h1>
+      <p class="sub">Paste URLs, add target selectors, then export everything to CSV.</p>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <p class="card-title">Scrape Setup</p>
+            <p class="card-subtitle">Enter URLs and tune the scrape cadence.</p>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <label for="urls">List of URLs (one per line)</label>
+          <textarea id="urls" placeholder="https://example.com\nhttps://example.org"></textarea>
+        </div>
+
+        <div class="panel-section">
+          <label class="checkbox-row" style="text-transform:none; letter-spacing:0;">
+            <input id="headless" type="checkbox" checked />
+            <span>Run headless (uncheck to show browser window)</span>
+          </label>
+
+          <div class="field" style="margin-top: 12px;">
+            <label for="frequency" class="label-title">Scrape Frequency (Seconds)</label>
+            <div class="field-sub">Delay between each URL fetch.</div>
+            <input id="frequency" type="number" min="0" step="0.5" />
+          </div>
+        </div>
+
+        <div class="actions sticky">
+          <button class="primary" id="scrape">Scrape</button>
+          <button class="secondary" id="stopScrape">Stop</button>
+          <button class="secondary" id="clear">Clear Results</button>
+        </div>
+
+        <div class="panel-section log-panel">
+          <label style="margin-bottom: 8px;">Run Log</label>
+          <div id="status" class="status"></div>
+          <div class="status-bar">
+            <div id="progressText">0 / 0</div>
+            <div id="etaText">ETA: --</div>
+          </div>
+          <div class="note" style="margin-top: 10px;">
+            Tip: some sites block headless browsers. If you see failures, uncheck headless to run visibly.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <p class="card-title">Targets</p>
+            <p class="card-subtitle">Adjust selectors or add new fields.</p>
+          </div>
+          <button class="secondary" id="addTarget">Add Target</button>
+        </div>
+        <div class="preset-bar">
+          <div class="field">
+            <label for="presetSelect" class="label-title">Preset</label>
+            <select id="presetSelect"></select>
+          </div>
+          <div class="preset-actions">
+            <input id="presetName" type="text" placeholder="New preset name" />
+            <button class="secondary" id="savePreset">Save</button>
+            <button class="ghost" id="deletePreset">Delete</button>
+            <button class="ghost" id="exportPreset">Export</button>
+            <button class="ghost" id="importPreset">Import</button>
+            <input id="importPresetFile" type="file" accept="application/json" style="display:none;" />
+          </div>
+        </div>
+        <div id="targets" class="targets-list"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 20px;">
+      <div class="card-header">
+        <div>
+          <p class="card-title">Results</p>
+          <p class="card-subtitle">Review and export the scraped data.</p>
+        </div>
+        <div class="actions" style="margin-top: 0;">
+          <button class="secondary" id="copyCsv" disabled>Copy Table</button>
+          <button class="secondary" id="downloadCsv" disabled>Download CSV</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="results"></table>
+      </div>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const defaultTargets = [
+      { label: "wp_slug", selector: "", mode: "slug", attr: "" },
+      { label: "page_title", selector: "title", mode: "text", attr: "" },
+      { label: "h1", selector: "h1", mode: "text", attr: "" },
+      { label: "meta_description", selector: "meta[name=\"description\"]", mode: "attr", attr: "content" },
+      { label: "canonical_url", selector: "link[rel=\"canonical\"]", mode: "attr", attr: "href" },
+      { label: "robots", selector: "meta[name=\"robots\"]", mode: "attr", attr: "content" },
+      { label: "og_title", selector: "meta[property=\"og:title\"], meta[name=\"og:title\"]", mode: "attr", attr: "content" },
+      { label: "og_description", selector: "meta[property=\"og:description\"], meta[name=\"og:description\"]", mode: "attr", attr: "content" },
+      { label: "og_type", selector: "meta[property=\"og:type\"], meta[name=\"og:type\"]", mode: "attr", attr: "content" },
+      { label: "og_image", selector: "meta[property=\"og:image\"], meta[name=\"og:image\"]", mode: "attr", attr: "content" },
+      { label: "hreflang", selector: "link[rel=\"alternate\"][hreflang]", mode: "hreflang", attr: "" },
+      { label: "jsonld", selector: "script[type=\"application/ld+json\"]", mode: "jsonld", attr: "" }
+    ];
+
+    const urlsEl = document.getElementById("urls");
+    const headlessEl = document.getElementById("headless");
+    const frequencyEl = document.getElementById("frequency");
+    const targetsEl = document.getElementById("targets");
+    const scrapeBtn = document.getElementById("scrape");
+    const stopScrapeBtn = document.getElementById("stopScrape");
+    const addTargetBtn = document.getElementById("addTarget");
+    const clearBtn = document.getElementById("clear");
+    const statusEl = document.getElementById("status");
+    const resultsTable = document.getElementById("results");
+    const copyCsvBtn = document.getElementById("copyCsv");
+    const downloadCsvBtn = document.getElementById("downloadCsv");
+    const presetSelect = document.getElementById("presetSelect");
+    const presetNameInput = document.getElementById("presetName");
+    const savePresetBtn = document.getElementById("savePreset");
+    const deletePresetBtn = document.getElementById("deletePreset");
+    const exportPresetBtn = document.getElementById("exportPreset");
+    const importPresetBtn = document.getElementById("importPreset");
+    const importPresetFile = document.getElementById("importPresetFile");
+    const toastEl = document.getElementById("toast");
+    const progressTextEl = document.getElementById("progressText");
+    const etaTextEl = document.getElementById("etaText");
+
+    const defaultFrequency = 0;
+    const presetStorageKey = "scraperPresetsV1";
+
+    function createTargetRow(data = {}) {
+      const row = document.createElement("div");
+      row.className = "row";
+
+      const label = document.createElement("input");
+      label.className = "target-label";
+      label.placeholder = "Column label";
+      label.value = data.label || "";
+
+      const selector = document.createElement("input");
+      selector.className = "target-selector";
+      selector.placeholder = "CSS selector";
+      selector.value = data.selector || "";
+
+      const mode = document.createElement("select");
+      mode.innerHTML = [
+        "<option value=\"text\">text</option>",
+        "<option value=\"textAll\">textAll</option>",
+        "<option value=\"attr\">attr</option>",
+        "<option value=\"attrAll\">attrAll</option>",
+        "<option value=\"hreflang\">hreflang</option>",
+        "<option value=\"jsonld\">jsonld</option>",
+        "<option value=\"slug\">slug</option>"
+      ].join("");
+      mode.value = data.mode || "text";
+
+      const attr = document.createElement("input");
+      attr.className = "target-attr";
+      attr.placeholder = "attr name";
+      attr.value = data.attr || "";
+      attr.disabled = !(mode.value === "attr" || mode.value === "attrAll");
+
+      const updateModeUI = () => {
+        const isAttr = mode.value === "attr" || mode.value === "attrAll";
+        const isSlug = mode.value === "slug";
+        attr.disabled = !isAttr;
+        selector.disabled = isSlug;
+        selector.placeholder = isSlug ? "Uses URL" : "CSS selector";
+      };
+
+      const updateTitles = () => {
+        label.title = label.value || label.placeholder;
+        selector.title = selector.value || selector.placeholder;
+        attr.title = attr.value || attr.placeholder;
+      };
+
+      mode.addEventListener("change", updateModeUI);
+      label.addEventListener("input", updateTitles);
+      selector.addEventListener("input", updateTitles);
+      attr.addEventListener("input", updateTitles);
+      updateModeUI();
+      updateTitles();
+
+      const remove = document.createElement("button");
+      remove.className = "remove";
+      remove.textContent = "×";
+      remove.addEventListener("click", () => row.remove());
+
+      row.append(label, selector, mode, attr, remove);
+      targetsEl.appendChild(row);
+    }
+
+    function getTargets() {
+      return Array.from(targetsEl.querySelectorAll(".row")).map((row) => {
+        const [label, selector, mode, attr] = row.querySelectorAll("input, select");
+        return {
+          label: label.value.trim() || "Untitled",
+          selector: selector.value.trim(),
+          mode: mode.value,
+          attr: attr.value.trim()
+        };
+      }).filter(t => t.selector || t.mode === "slug");
+    }
+
+    function clearTargets() {
+      targetsEl.innerHTML = "";
+    }
+
+    function applyTargets(targets) {
+      clearTargets();
+      targets.forEach(t => createTargetRow(t));
+    }
+
+    function readPresetStore() {
+      try {
+        const raw = localStorage.getItem(presetStorageKey);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch {
+        return null;
+      }
+    }
+
+    function writePresetStore(store) {
+      localStorage.setItem(presetStorageKey, JSON.stringify(store));
+    }
+
+    function ensurePresetStore() {
+      const existing = readPresetStore();
+      if (existing && existing.presets) return existing;
+      const store = {
+        last: "Default",
+        presets: {
+          "Default": defaultTargets
+        }
+      };
+      writePresetStore(store);
+      return store;
+    }
+
+    function renderPresetOptions(store, selected) {
+      presetSelect.innerHTML = "";
+      Object.keys(store.presets).sort().forEach((name) => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        if (name === selected) option.selected = true;
+        presetSelect.appendChild(option);
+      });
+    }
+
+    function loadPreset(name) {
+      const store = ensurePresetStore();
+      const preset = store.presets[name];
+      if (!preset) return;
+      applyTargets(preset.targets || preset);
+      if (preset.frequency) {
+        frequencyEl.value = preset.frequency;
+      }
+      store.last = name;
+      writePresetStore(store);
+      renderPresetOptions(store, name);
+    }
+
+    function savePreset(name) {
+      const trimmed = name.trim();
+      if (!trimmed) return;
+      const store = ensurePresetStore();
+      store.presets[trimmed] = {
+        targets: getTargets(),
+        frequency: Number(frequencyEl.value || defaultFrequency)
+      };
+      store.last = trimmed;
+      writePresetStore(store);
+      renderPresetOptions(store, trimmed);
+    }
+
+    function deletePreset(name) {
+      const store = ensurePresetStore();
+      if (!store.presets[name]) return;
+      if (Object.keys(store.presets).length <= 1) return;
+      delete store.presets[name];
+      const next = Object.keys(store.presets)[0];
+      store.last = next;
+      writePresetStore(store);
+      renderPresetOptions(store, next);
+      loadPreset(next);
+    }
+
+    function exportPresets() {
+      const store = ensurePresetStore();
+      const blob = new Blob([JSON.stringify(store, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "scraper-presets.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importPresetsFromFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          if (!parsed || typeof parsed !== "object" || !parsed.presets) {
+            throw new Error("Invalid preset file.");
+          }
+          const store = ensurePresetStore();
+          const importName = prompt("Preset name for import:", parsed.last || "Imported Preset");
+          if (!importName) return;
+          const importedPreset = parsed.last && parsed.presets[parsed.last]
+            ? parsed.presets[parsed.last]
+            : Object.values(parsed.presets)[0];
+          store.presets[importName] = importedPreset;
+          store.last = importName;
+          writePresetStore(store);
+          renderPresetOptions(store, store.last);
+          loadPreset(store.last);
+        } catch (err) {
+          log(`Preset import failed: ${err.message || err}`);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function log(message) {
+      statusEl.textContent += message + "\n";
+      statusEl.scrollTop = statusEl.scrollHeight;
+    }
+
+    function clearLog() {
+      statusEl.textContent = "";
+      progressTextEl.textContent = "0 / 0";
+      etaTextEl.textContent = "ETA: --";
+    }
+
+    let toastTimer = null;
+    function showToast(message) {
+      if (!toastEl) return;
+      toastEl.textContent = message;
+      toastEl.classList.add("show");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toastEl.classList.remove("show");
+      }, 1600);
+    }
+
+    function escapeCsv(value) {
+      const text = (value ?? "").toString().replace(/\r?\n/g, " ").trim();
+      return '"' + text.replace(/"/g, '""') + '"';
+    }
+
+    function buildCsv(rows, headers) {
+      const lines = [];
+      lines.push(headers.map(escapeCsv).join(","));
+      for (const row of rows) {
+        lines.push(headers.map(h => escapeCsv(row[h])).join(","));
+      }
+      return lines.join("\n");
+    }
+
+    function buildTsv(rows, headers) {
+      const sanitize = (value) => (value ?? "").toString().replace(/\t/g, " ").replace(/\r?\n/g, " ").trim();
+      const lines = [];
+      lines.push(headers.map(sanitize).join("\t"));
+      for (const row of rows) {
+        lines.push(headers.map(h => sanitize(row[h])).join("\t"));
+      }
+      return lines.join("\n");
+    }
+
+    function setButtonsEnabled(enabled) {
+      copyCsvBtn.disabled = !enabled;
+      downloadCsvBtn.disabled = !enabled;
+    }
+
+    function renderTable(headers, rows) {
+      resultsTable.innerHTML = "";
+      if (!rows.length) return;
+      const colgroup = document.createElement("colgroup");
+      const extraCols = headers.length - 1;
+      headers.forEach((_, idx) => {
+        const col = document.createElement("col");
+        if (idx === 0) {
+          col.style.minWidth = extraCols > 0 ? "500px" : "100%";
+        } else {
+          col.style.minWidth = "200px";
+        }
+        colgroup.appendChild(col);
+      });
+      resultsTable.appendChild(colgroup);
+      const thead = document.createElement("thead");
+      const headRow = document.createElement("tr");
+      headers.forEach(h => {
+        const th = document.createElement("th");
+        th.textContent = h;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+      resultsTable.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+      rows.forEach(row => {
+        const tr = document.createElement("tr");
+        headers.forEach((h, idx) => {
+          const td = document.createElement("td");
+          if (idx === 0 && row[h]) {
+            const link = document.createElement("a");
+            link.className = "cell";
+            link.href = row[h];
+            link.textContent = row[h];
+            link.addEventListener("click", (event) => {
+              event.preventDefault();
+              if (window.scraper?.openExternal) {
+                window.scraper.openExternal(row[h]);
+              }
+            });
+            td.appendChild(link);
+          } else {
+            const cell = document.createElement("div");
+            cell.className = "cell";
+            cell.textContent = row[h] || "";
+            td.appendChild(cell);
+          }
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      resultsTable.appendChild(tbody);
+    }
+
+    function textContent(node) {
+      return node ? node.textContent.trim() : "";
+    }
+
+    function parseHreflang(doc, selector) {
+      const nodes = Array.from(doc.querySelectorAll(selector || 'link[rel="alternate"][hreflang]'));
+      return nodes.map(l => `${l.getAttribute("hreflang")}:${l.getAttribute("href") || ""}`)
+        .join(" | ");
+    }
+
+    function parseJsonLd(doc, selector) {
+      const scripts = Array.from(doc.querySelectorAll(selector || 'script[type="application/ld+json"]'));
+      if (!scripts.length) return "";
+      const pieces = scripts.map(s => {
+        const raw = (s.textContent || "").trim();
+        if (!raw) return "";
+        try {
+          return JSON.stringify(JSON.parse(raw));
+        } catch {
+          return raw.replace(/\s+/g, " ");
+        }
+      }).filter(Boolean);
+      return pieces.join(" | ");
+    }
+
+    function slugFromUrl(url) {
+      try {
+        const parsed = new URL(url);
+        const parts = parsed.pathname.split("/").filter(Boolean);
+        if (!parts.length) return "";
+        return decodeURIComponent(parts[parts.length - 1]);
+      } catch {
+        return "";
+      }
+    }
+
+    function extractTargetValue(doc, target, pageUrl) {
+      if (target.mode === "slug") {
+        return slugFromUrl(pageUrl);
+      }
+
+      if (!target.selector) return "";
+
+      let nodes = [];
+      try {
+        nodes = Array.from(doc.querySelectorAll(target.selector));
+      } catch {
+        return "";
+      }
+      const first = nodes[0] || null;
+
+      switch (target.mode) {
+        case "text":
+          return first ? textContent(first) : "";
+        case "textAll":
+          return nodes.map(textContent).filter(Boolean).join(" | ");
+        case "attr":
+          return first ? (first.getAttribute(target.attr || "") || "") : "";
+        case "attrAll":
+          return nodes.map(n => n.getAttribute(target.attr || "") || "").filter(Boolean).join(" | ");
+        case "hreflang":
+          return parseHreflang(doc, target.selector);
+        case "jsonld":
+          return parseJsonLd(doc, target.selector);
+        default:
+          return "";
+      }
+    }
+
+    async function scrape() {
+      clearLog();
+      setButtonsEnabled(false);
+      resultsTable.innerHTML = "";
+
+      const urls = urlsEl.value.split(/\r?\n/).map(u => u.trim()).filter(Boolean);
+      if (!urls.length) {
+        log("Add at least one URL.");
+        return;
+      }
+
+      if (!window.scraper) {
+        log("This app must be opened via the desktop app (Electron).");
+        return;
+      }
+
+      const frequencySeconds = Math.max(0, Number(frequencyEl.value || defaultFrequency));
+      const customTargets = getTargets();
+      const headers = ["URL", ...customTargets.map(t => t.label)];
+
+      const rows = [];
+      scrapeBtn.disabled = true;
+
+      window.scraper.onStatus((data) => {
+        if (data?.type === "progress") {
+          const completed = data.completed ?? 0;
+          const total = data.total ?? 0;
+          progressTextEl.textContent = `${completed} / ${total}`;
+          if (data.remainingMs !== undefined) {
+            const seconds = Math.ceil(data.remainingMs / 1000);
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            etaTextEl.textContent = mins > 0 ? `ETA: ${mins}m ${secs}s` : `ETA: ${secs}s`;
+          } else {
+            etaTextEl.textContent = "ETA: --";
+          }
+          return;
+        }
+        if (data?.message) log(data.message);
+      });
+
+      try {
+        const results = await window.scraper.scrapeUrls({
+          urls,
+          delaySeconds: frequencySeconds,
+          headless: headlessEl.checked
+        });
+
+        if (!Array.isArray(results)) {
+          throw new Error("No results returned from scraper.");
+        }
+
+        for (const result of results) {
+          if (!result.html) {
+            rows.push({ "URL": result.url, ...Object.fromEntries(customTargets.map(t => [t.label, ""])) });
+            continue;
+          }
+          const doc = new DOMParser().parseFromString(result.html, "text/html");
+          const row = { "URL": result.url };
+          for (const target of customTargets) {
+            row[target.label] = extractTargetValue(doc, target, result.url);
+          }
+          rows.push(row);
+        }
+
+        const csv = buildCsv(rows, headers);
+        const tsv = buildTsv(rows, headers);
+        renderTable(headers, rows);
+        setButtonsEnabled(true);
+
+        copyCsvBtn.onclick = async () => {
+          await navigator.clipboard.writeText(tsv);
+          log("Table copied to clipboard.");
+        };
+
+        downloadCsvBtn.onclick = () => {
+          const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "scrape-results.csv";
+          a.click();
+          URL.revokeObjectURL(url);
+        };
+      } catch (err) {
+        log(`Scrape failed: ${err?.message || err}`);
+      } finally {
+        scrapeBtn.disabled = false;
+      }
+    }
+
+    scrapeBtn.addEventListener("click", scrape);
+    stopScrapeBtn.addEventListener("click", async () => {
+      if (window.scraper?.stopScrape) {
+        await window.scraper.stopScrape();
+        log("Stop requested.");
+      }
+    });
+    addTargetBtn.addEventListener("click", () => createTargetRow());
+    clearBtn.addEventListener("click", () => {
+      resultsTable.innerHTML = "";
+      setButtonsEnabled(false);
+      clearLog();
+      scrapeBtn.disabled = false;
+    });
+    document.addEventListener("click", (event) => {
+      const btn = event.target.closest("button");
+      if (!btn) return;
+      const id = btn.id;
+      const messages = {
+        scrape: "Scrape started",
+        clear: "Results cleared",
+        addTarget: "Target added",
+        copyCsv: "Table copied",
+        downloadCsv: "CSV download started",
+        savePreset: "Preset saved",
+        deletePreset: "Preset deleted",
+        exportPreset: "Presets exported",
+        importPreset: "Select a preset file",
+        stopScrape: "Stop requested"
+      };
+      if (messages[id]) showToast(messages[id]);
+    });
+    presetSelect.addEventListener("change", () => {
+      loadPreset(presetSelect.value);
+    });
+    savePresetBtn.addEventListener("click", () => {
+      const name = presetNameInput.value || presetSelect.value;
+      savePreset(name);
+      presetNameInput.value = "";
+    });
+    deletePresetBtn.addEventListener("click", () => {
+      const name = presetSelect.value;
+      if (name === "Default") return;
+      const ok = confirm(`Delete preset \"${name}\"?`);
+      if (ok) deletePreset(name);
+    });
+    exportPresetBtn.addEventListener("click", exportPresets);
+    importPresetBtn.addEventListener("click", () => importPresetFile.click());
+    importPresetFile.addEventListener("change", (event) => {
+      const file = event.target.files && event.target.files[0];
+      importPresetsFromFile(file);
+      importPresetFile.value = "";
+    });
+
+    urlsEl.value = [
+      "https://www.bowtie.com.hk/blog/zh/learn/%E8%87%AA%E9%A1%98%E9%86%AB%E4%BF%9D-top-up-%E5%85%AC%E5%8F%B8%E9%86%AB%E4%BF%9D/",
+      "https://example.com"
+    ].join("\n");
+    frequencyEl.value = defaultFrequency;
+
+    const store = ensurePresetStore();
+    renderPresetOptions(store, store.last || "Default");
+    loadPreset(store.last || "Default");
+  </script>
+</body>
+</html>
