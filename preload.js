@@ -7,5 +7,9 @@ contextBridge.exposeInMainWorld("scraper", {
   onStatus: (handler) => {
     ipcRenderer.removeAllListeners("scrape-status");
     ipcRenderer.on("scrape-status", (_event, data) => handler(data));
+  },
+  onResult: (handler) => {
+    ipcRenderer.removeAllListeners("scrape-result");
+    ipcRenderer.on("scrape-result", (_event, data) => handler(data));
   }
 });

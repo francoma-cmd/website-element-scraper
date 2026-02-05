@@ -145,7 +145,7 @@
 
     .row {
       display: grid;
-      grid-template-columns: minmax(160px, 1.2fr) minmax(220px, 2.3fr) minmax(120px, 0.9fr) minmax(140px, 1fr) 32px;
+      grid-template-columns: 28px minmax(160px, 1.2fr) minmax(220px, 2.3fr) minmax(120px, 0.9fr) minmax(140px, 1fr) 32px;
       gap: 10px;
       align-items: center;
       margin-bottom: 10px;
@@ -153,6 +153,39 @@
       border: 1px solid var(--line);
       border-radius: var(--radius-md);
       background: #27173b;
+    }
+
+    .row.dragging {
+      opacity: 0.6;
+      border-color: var(--accent);
+      box-shadow: var(--glow);
+    }
+
+    .row .drag-handle {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+      font-weight: 700;
+      cursor: grab;
+      font-size: 14px;
+      line-height: 1;
+      width: 24px;
+      height: 30px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .row .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .row .target-attr.is-ghost {
+      background: transparent;
+      border: 1px dashed rgba(255, 255, 255, 0.14);
+      color: var(--muted);
     }
 
     .row input,
@@ -461,7 +494,7 @@
 
         <div class="panel-section">
           <label for="urls">List of URLs (one per line)</label>
-          <textarea id="urls" placeholder="https://example.com\nhttps://example.org"></textarea>
+          <textarea id="urls" placeholder="https://example.com&#10;https://example.org"></textarea>
         </div>
 
         <div class="panel-section">
@@ -469,6 +502,27 @@
             <input id="headless" type="checkbox" checked />
             <span>Run headless (uncheck to show browser window)</span>
           </label>
+
+          <label class="checkbox-row" style="text-transform:none; letter-spacing:0; margin-top: 10px;">
+            <input id="renderJs" type="checkbox" checked />
+            <span>Render JavaScript (needed for dynamic elements)</span>
+          </label>
+
+          <label class="checkbox-row" style="text-transform:none; letter-spacing:0; margin-top: 10px;">
+            <input id="blockResources" type="checkbox" checked />
+            <span>Block images/fonts/media/stylesheets</span>
+          </label>
+
+          <div class="field" style="margin-top: 12px;" id="waitSelectorField">
+            <label for="waitSelector" class="label-title">Wait For Selector (optional)</label>
+            <input id="waitSelector" type="text" placeholder="CSS selector" />
+          </div>
+
+          <div class="field" style="margin-top: 12px;" id="waitTimeoutField">
+            <label for="waitTimeout" class="label-title">Wait Timeout (Seconds)</label>
+            <div class="field-sub">If selector is set, max time to wait. If empty, extra delay after load.</div>
+            <input id="waitTimeout" type="number" min="0" step="1" value="0" />
+          </div>
 
           <div class="field" style="margin-top: 12px;">
             <label for="frequency" class="label-title">Scrape Frequency (Seconds)</label>
@@ -493,6 +547,9 @@
           <div class="note" style="margin-top: 10px;">
             Tip: some sites block headless browsers. If you see failures, uncheck headless to run visibly.
           </div>
+        </div>
+        <div class="panel-section">
+          <button class="ghost" id="resetDefaults">Reset to Defaults</button>
         </div>
       </div>
 
@@ -558,12 +615,19 @@
 
     const urlsEl = document.getElementById("urls");
     const headlessEl = document.getElementById("headless");
+    const renderJsEl = document.getElementById("renderJs");
+    const blockResourcesEl = document.getElementById("blockResources");
+    const waitSelectorEl = document.getElementById("waitSelector");
+    const waitTimeoutEl = document.getElementById("waitTimeout");
+    const waitSelectorField = document.getElementById("waitSelectorField");
+    const waitTimeoutField = document.getElementById("waitTimeoutField");
     const frequencyEl = document.getElementById("frequency");
     const targetsEl = document.getElementById("targets");
     const scrapeBtn = document.getElementById("scrape");
     const stopScrapeBtn = document.getElementById("stopScrape");
     const addTargetBtn = document.getElementById("addTarget");
     const clearBtn = document.getElementById("clear");
+    const resetDefaultsBtn = document.getElementById("resetDefaults");
     const statusEl = document.getElementById("status");
     const resultsTable = document.getElementById("results");
     const copyCsvBtn = document.getElementById("copyCsv");
@@ -581,10 +645,42 @@
 
     const defaultFrequency = 0;
     const presetStorageKey = "scraperPresetsV1";
+    const sessionStorageKey = "scraperSessionV1";
+    let sessionState = null;
+    let currentHeaders = [];
+    let currentRows = [];
+
+    function syncRenderModeUI() {
+      const enabled = !!renderJsEl.checked;
+      waitSelectorField.style.display = enabled ? "" : "none";
+      waitTimeoutField.style.display = enabled ? "" : "none";
+    }
+    renderJsEl.addEventListener("change", () => {
+      syncRenderModeUI();
+      scheduleSaveInputs();
+    });
+    syncRenderModeUI();
 
     function createTargetRow(data = {}) {
       const row = document.createElement("div");
       row.className = "row";
+      row.setAttribute("draggable", "true");
+
+      const dragHandle = document.createElement("button");
+      dragHandle.type = "button";
+      dragHandle.className = "drag-handle";
+      dragHandle.textContent = "::";
+      dragHandle.title = "Drag to reorder";
+      dragHandle.setAttribute("aria-label", "Drag to reorder");
+      dragHandle.addEventListener("pointerdown", () => {
+        row.dataset.dragHandle = "1";
+      });
+      dragHandle.addEventListener("pointerup", () => {
+        delete row.dataset.dragHandle;
+      });
+      dragHandle.addEventListener("pointerleave", () => {
+        delete row.dataset.dragHandle;
+      });
 
       const label = document.createElement("input");
       label.className = "target-label";
@@ -600,6 +696,10 @@
       mode.innerHTML = [
         "<option value=\"text\">text</option>",
         "<option value=\"textAll\">textAll</option>",
+        "<option value=\"innerHTML\">innerHTML</option>",
+        "<option value=\"innerHTMLAll\">innerHTMLAll</option>",
+        "<option value=\"outerHTML\">outerHTML</option>",
+        "<option value=\"outerHTMLAll\">outerHTMLAll</option>",
         "<option value=\"attr\">attr</option>",
         "<option value=\"attrAll\">attrAll</option>",
         "<option value=\"hreflang\">hreflang</option>",
@@ -618,6 +718,8 @@
         const isAttr = mode.value === "attr" || mode.value === "attrAll";
         const isSlug = mode.value === "slug";
         attr.disabled = !isAttr;
+        attr.classList.toggle("is-ghost", !isAttr);
+        attr.placeholder = isAttr ? "attr name" : "—";
         selector.disabled = isSlug;
         selector.placeholder = isSlug ? "Uses URL" : "CSS selector";
       };
@@ -628,23 +730,83 @@
         attr.title = attr.value || attr.placeholder;
       };
 
-      mode.addEventListener("change", updateModeUI);
-      label.addEventListener("input", updateTitles);
-      selector.addEventListener("input", updateTitles);
-      attr.addEventListener("input", updateTitles);
+      mode.addEventListener("change", () => {
+        updateModeUI();
+        scheduleSaveInputs();
+      });
+      label.addEventListener("input", () => {
+        updateTitles();
+        scheduleSaveInputs();
+      });
+      selector.addEventListener("input", () => {
+        updateTitles();
+        scheduleSaveInputs();
+      });
+      attr.addEventListener("input", () => {
+        updateTitles();
+        scheduleSaveInputs();
+      });
       updateModeUI();
       updateTitles();
 
       const remove = document.createElement("button");
       remove.className = "remove";
       remove.textContent = "×";
-      remove.addEventListener("click", () => row.remove());
+      remove.addEventListener("click", () => {
+        row.remove();
+        scheduleSaveInputs();
+      });
 
-      row.append(label, selector, mode, attr, remove);
+      row.addEventListener("dragstart", (event) => {
+        if (!row.dataset.dragHandle) {
+          event.preventDefault();
+          return;
+        }
+        row.classList.add("dragging");
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", "");
+      });
+
+      row.addEventListener("dragend", () => {
+        row.classList.remove("dragging");
+        delete row.dataset.dragHandle;
+        scheduleSaveInputs();
+      });
+
+      row.append(dragHandle, label, selector, mode, attr, remove);
       targetsEl.appendChild(row);
     }
 
-    function getTargets() {
+    function getDragAfterElement(container, y) {
+      const elements = Array.from(container.querySelectorAll(".row:not(.dragging)"));
+      let closest = { offset: Number.NEGATIVE_INFINITY, element: null };
+      elements.forEach((child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          closest = { offset, element: child };
+        }
+      });
+      return closest.element;
+    }
+
+    targetsEl.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      const dragging = targetsEl.querySelector(".row.dragging");
+      if (!dragging) return;
+      const afterElement = getDragAfterElement(targetsEl, event.clientY);
+      if (afterElement == null) {
+        targetsEl.appendChild(dragging);
+      } else {
+        targetsEl.insertBefore(dragging, afterElement);
+      }
+    });
+
+    targetsEl.addEventListener("drop", (event) => {
+      event.preventDefault();
+    });
+
+    function getTargetsRaw() {
       return Array.from(targetsEl.querySelectorAll(".row")).map((row) => {
         const [label, selector, mode, attr] = row.querySelectorAll("input, select");
         return {
@@ -653,7 +815,11 @@
           mode: mode.value,
           attr: attr.value.trim()
         };
-      }).filter(t => t.selector || t.mode === "slug");
+      });
+    }
+
+    function getTargets() {
+      return getTargetsRaw().filter(t => t.selector || t.mode === "slug");
     }
 
     function clearTargets() {
@@ -692,6 +858,88 @@
       return store;
     }
 
+    function readSessionState() {
+      if (sessionState) return sessionState;
+      try {
+        const raw = localStorage.getItem(sessionStorageKey);
+        sessionState = raw ? JSON.parse(raw) : null;
+      } catch {
+        sessionState = null;
+      }
+      return sessionState;
+    }
+
+    function writeSessionState(next) {
+      sessionState = next;
+      localStorage.setItem(sessionStorageKey, JSON.stringify(next));
+    }
+
+    function updateSessionState(patch) {
+      const current = readSessionState() || { version: 1 };
+      const next = { ...current, ...patch };
+      writeSessionState(next);
+      return next;
+    }
+
+    function clearSessionState() {
+      sessionState = null;
+      localStorage.removeItem(sessionStorageKey);
+    }
+
+    function captureInputsState() {
+      return {
+        urls: urlsEl.value,
+        headless: headlessEl.checked,
+        renderJs: renderJsEl.checked,
+        blockResources: blockResourcesEl.checked,
+        waitSelector: waitSelectorEl.value,
+        waitTimeout: Number.isFinite(Number(waitTimeoutEl.value)) ? Number(waitTimeoutEl.value) : 15,
+        frequency: Number(frequencyEl.value || defaultFrequency),
+        targets: getTargetsRaw(),
+        preset: presetSelect.value || "Default"
+      };
+    }
+
+    function applyInputsState(inputs) {
+      if (!inputs) return;
+      if (typeof inputs.urls === "string") urlsEl.value = inputs.urls;
+      if (typeof inputs.headless === "boolean") headlessEl.checked = inputs.headless;
+      if (typeof inputs.renderJs === "boolean") renderJsEl.checked = inputs.renderJs;
+      if (typeof inputs.blockResources === "boolean") blockResourcesEl.checked = inputs.blockResources;
+      if (typeof inputs.waitSelector === "string") waitSelectorEl.value = inputs.waitSelector;
+      if (typeof inputs.waitTimeout === "number") waitTimeoutEl.value = inputs.waitTimeout;
+      if (typeof inputs.frequency === "number") frequencyEl.value = inputs.frequency;
+      if (Array.isArray(inputs.targets) && inputs.targets.length) {
+        applyTargets(inputs.targets);
+      } else if (inputs.preset) {
+        presetSelect.value = inputs.preset;
+        loadPreset(inputs.preset);
+      }
+      if (inputs.preset) presetSelect.value = inputs.preset;
+      syncRenderModeUI();
+    }
+
+    let saveInputsTimer = null;
+    function saveInputsState() {
+      updateSessionState({ inputs: captureInputsState() });
+    }
+
+    function scheduleSaveInputs() {
+      if (saveInputsTimer) clearTimeout(saveInputsTimer);
+      saveInputsTimer = setTimeout(saveInputsState, 250);
+    }
+
+    function buildRunSignature({ urls, targets, options }) {
+      return JSON.stringify({ urls, targets, options });
+    }
+
+    function saveResultsState(headers, rows, resume) {
+      updateSessionState({
+        results: { headers, rows },
+        resume
+      });
+    }
+
     function renderPresetOptions(store, selected) {
       presetSelect.innerHTML = "";
       Object.keys(store.presets).sort().forEach((name) => {
@@ -714,6 +962,7 @@
       store.last = name;
       writePresetStore(store);
       renderPresetOptions(store, name);
+      scheduleSaveInputs();
     }
 
     function savePreset(name) {
@@ -727,6 +976,7 @@
       store.last = trimmed;
       writePresetStore(store);
       renderPresetOptions(store, trimmed);
+      scheduleSaveInputs();
     }
 
     function deletePreset(name) {
@@ -739,6 +989,7 @@
       writePresetStore(store);
       renderPresetOptions(store, next);
       loadPreset(next);
+      scheduleSaveInputs();
     }
 
     function exportPresets() {
@@ -934,17 +1185,23 @@
       } catch {
         return "";
       }
-      const first = nodes[0] || null;
-
       switch (target.mode) {
         case "text":
-          return first ? textContent(first) : "";
+          return nodes.map(textContent).filter(Boolean).join(", ");
         case "textAll":
-          return nodes.map(textContent).filter(Boolean).join(" | ");
+          return nodes.map(textContent).filter(Boolean).join(", ");
+        case "innerHTML":
+          return nodes.map(n => (n ? n.innerHTML : "")).filter(Boolean).join(", ");
+        case "innerHTMLAll":
+          return nodes.map(n => (n ? n.innerHTML : "")).filter(Boolean).join(", ");
+        case "outerHTML":
+          return nodes.map(n => (n ? n.outerHTML : "")).filter(Boolean).join(", ");
+        case "outerHTMLAll":
+          return nodes.map(n => (n ? n.outerHTML : "")).filter(Boolean).join(", ");
         case "attr":
-          return first ? (first.getAttribute(target.attr || "") || "") : "";
+          return nodes.map(n => n.getAttribute(target.attr || "") || "").filter(Boolean).join(", ");
         case "attrAll":
-          return nodes.map(n => n.getAttribute(target.attr || "") || "").filter(Boolean).join(" | ");
+          return nodes.map(n => n.getAttribute(target.attr || "") || "").filter(Boolean).join(", ");
         case "hreflang":
           return parseHreflang(doc, target.selector);
         case "jsonld":
@@ -954,10 +1211,88 @@
       }
     }
 
-    async function scrape() {
+    function updateProgressUI(completed, total, remainingMs) {
+      progressTextEl.textContent = `${completed} / ${total}`;
+      if (remainingMs !== undefined) {
+        const seconds = Math.ceil(remainingMs / 1000);
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        etaTextEl.textContent = mins > 0 ? `ETA: ${mins}m ${secs}s` : `ETA: ${secs}s`;
+      } else {
+        etaTextEl.textContent = "ETA: --";
+      }
+    }
+
+    function appendResultRow(result, targets) {
+      const row = { "URL": result.url };
+      if (!result.html) {
+        targets.forEach(t => {
+          row[t.label] = "";
+        });
+        return row;
+      }
+      const doc = new DOMParser().parseFromString(result.html, "text/html");
+      targets.forEach(target => {
+        row[target.label] = extractTargetValue(doc, target, result.url);
+      });
+      return row;
+    }
+
+    function bindExportButtons() {
+      copyCsvBtn.onclick = async () => {
+        if (!currentHeaders.length || !currentRows.length) return;
+        const tsv = buildTsv(currentRows, currentHeaders);
+        await navigator.clipboard.writeText(tsv);
+        log("Table copied to clipboard.");
+      };
+      downloadCsvBtn.onclick = () => {
+        if (!currentHeaders.length || !currentRows.length) return;
+        const csv = buildCsv(currentRows, currentHeaders);
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "scrape-results.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+      };
+    }
+
+    function resetToDefaults() {
+      const store = ensurePresetStore();
+      store.last = "Default";
+      writePresetStore(store);
+      renderPresetOptions(store, "Default");
+
+      urlsEl.value = [
+        "https://example.com",
+        "https://example.org"
+      ].join("\n");
+      headlessEl.checked = true;
+      renderJsEl.checked = true;
+      blockResourcesEl.checked = true;
+      waitSelectorEl.value = "";
+      waitTimeoutEl.value = 15;
+      frequencyEl.value = defaultFrequency;
+
+      presetSelect.value = "Default";
+      const defaultPreset = store.presets?.Default || defaultTargets;
+      applyTargets(defaultPreset.targets || defaultPreset);
+
+      resultsTable.innerHTML = "";
+      currentRows = [];
+      currentHeaders = [];
       clearLog();
       setButtonsEnabled(false);
-      resultsTable.innerHTML = "";
+      syncRenderModeUI();
+
+      clearSessionState();
+      saveInputsState();
+      updateSessionState({ results: { headers: [], rows: [] }, resume: null });
+    }
+
+    async function scrape() {
+      clearLog();
 
       const urls = urlsEl.value.split(/\r?\n/).map(u => u.trim()).filter(Boolean);
       if (!urls.length) {
@@ -973,71 +1308,126 @@
       const frequencySeconds = Math.max(0, Number(frequencyEl.value || defaultFrequency));
       const customTargets = getTargets();
       const headers = ["URL", ...customTargets.map(t => t.label)];
+      const options = {
+        headless: headlessEl.checked,
+        renderJs: renderJsEl.checked,
+        blockResources: blockResourcesEl.checked,
+        waitForSelector: waitSelectorEl.value.trim(),
+        waitTimeoutSeconds: Number.isFinite(Number(waitTimeoutEl.value)) ? Number(waitTimeoutEl.value) : 15,
+        delaySeconds: frequencySeconds
+      };
+      const signature = buildRunSignature({ urls, targets: customTargets, options });
 
-      const rows = [];
+      const saved = readSessionState();
+      const savedRows = Array.isArray(saved?.results?.rows) ? saved.results.rows : [];
+      const savedResume = saved?.resume;
+      const resumeIndexRaw = Number(savedResume?.nextIndex ?? savedRows.length);
+      const resumeIndex = Number.isFinite(resumeIndexRaw)
+        ? Math.min(savedRows.length, Math.max(0, resumeIndexRaw))
+        : 0;
+      const canResume = !!savedResume
+        && savedResume.signature === signature
+        && Array.isArray(savedResume.urls)
+        && savedResume.urls.length === urls.length
+        && resumeIndex < urls.length
+        && savedRows.length > 0;
+
+      let resumeOffset = 0;
+      if (canResume) {
+        resumeOffset = resumeIndex;
+        currentRows = savedRows.slice(0, resumeOffset);
+        currentHeaders = headers;
+        renderTable(currentHeaders, currentRows);
+        setButtonsEnabled(currentRows.length > 0);
+        log(`Resuming from ${resumeOffset + 1} / ${urls.length}.`);
+      } else {
+        currentRows = [];
+        currentHeaders = headers;
+        resultsTable.innerHTML = "";
+        setButtonsEnabled(false);
+      }
+
+      saveInputsState();
+      const resumeState = {
+        signature,
+        urls,
+        nextIndex: resumeOffset,
+        total: urls.length,
+        options,
+        targets: customTargets
+      };
+      saveResultsState(currentHeaders, currentRows, resumeState);
+      updateProgressUI(resumeOffset, urls.length);
+
+      const remainingUrls = urls.slice(resumeOffset);
+      const baseRows = currentRows.length;
+      let addedThisRun = 0;
+
       scrapeBtn.disabled = true;
-
       window.scraper.onStatus((data) => {
         if (data?.type === "progress") {
-          const completed = data.completed ?? 0;
-          const total = data.total ?? 0;
-          progressTextEl.textContent = `${completed} / ${total}`;
-          if (data.remainingMs !== undefined) {
-            const seconds = Math.ceil(data.remainingMs / 1000);
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            etaTextEl.textContent = mins > 0 ? `ETA: ${mins}m ${secs}s` : `ETA: ${secs}s`;
-          } else {
-            etaTextEl.textContent = "ETA: --";
-          }
+          const completed = (data.completed ?? 0) + resumeOffset;
+          updateProgressUI(completed, urls.length, data.remainingMs);
           return;
         }
         if (data?.message) log(data.message);
       });
 
+      window.scraper.onResult((data) => {
+        if (!data?.result) return;
+        const row = appendResultRow(data.result, customTargets);
+        currentRows.push(row);
+        addedThisRun += 1;
+        renderTable(currentHeaders, currentRows);
+        setButtonsEnabled(true);
+        const nextIndex = baseRows + addedThisRun;
+        saveResultsState(currentHeaders, currentRows, {
+          ...resumeState,
+          nextIndex
+        });
+      });
+
       try {
+        if (!remainingUrls.length) {
+          log("All URLs already scraped.");
+          updateProgressUI(urls.length, urls.length, 0);
+          saveResultsState(currentHeaders, currentRows, {
+            ...resumeState,
+            nextIndex: urls.length
+          });
+          return;
+        }
+
         const results = await window.scraper.scrapeUrls({
-          urls,
+          urls: remainingUrls,
           delaySeconds: frequencySeconds,
-          headless: headlessEl.checked
+          headless: headlessEl.checked,
+          rawHtmlOnly: !renderJsEl.checked,
+          blockResources: blockResourcesEl.checked,
+          waitForSelector: waitSelectorEl.value.trim(),
+          waitTimeoutSeconds: Number.isFinite(Number(waitTimeoutEl.value)) ? Number(waitTimeoutEl.value) : 15
         });
 
         if (!Array.isArray(results)) {
           throw new Error("No results returned from scraper.");
         }
 
-        for (const result of results) {
-          if (!result.html) {
-            rows.push({ "URL": result.url, ...Object.fromEntries(customTargets.map(t => [t.label, ""])) });
-            continue;
-          }
-          const doc = new DOMParser().parseFromString(result.html, "text/html");
-          const row = { "URL": result.url };
-          for (const target of customTargets) {
-            row[target.label] = extractTargetValue(doc, target, result.url);
-          }
-          rows.push(row);
+        const expectedCount = resumeOffset + results.length;
+        if (currentRows.length < expectedCount) {
+          const alreadyAdded = Math.max(0, currentRows.length - resumeOffset);
+          const missing = results.slice(alreadyAdded);
+          missing.forEach((result) => {
+            const row = appendResultRow(result, customTargets);
+            currentRows.push(row);
+          });
+          renderTable(currentHeaders, currentRows);
+          setButtonsEnabled(currentRows.length > 0);
         }
 
-        const csv = buildCsv(rows, headers);
-        const tsv = buildTsv(rows, headers);
-        renderTable(headers, rows);
-        setButtonsEnabled(true);
-
-        copyCsvBtn.onclick = async () => {
-          await navigator.clipboard.writeText(tsv);
-          log("Table copied to clipboard.");
-        };
-
-        downloadCsvBtn.onclick = () => {
-          const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "scrape-results.csv";
-          a.click();
-          URL.revokeObjectURL(url);
-        };
+        saveResultsState(currentHeaders, currentRows, {
+          ...resumeState,
+          nextIndex: Math.min(urls.length, resumeOffset + results.length)
+        });
       } catch (err) {
         log(`Scrape failed: ${err?.message || err}`);
       } finally {
@@ -1052,12 +1442,21 @@
         log("Stop requested.");
       }
     });
-    addTargetBtn.addEventListener("click", () => createTargetRow());
+    addTargetBtn.addEventListener("click", () => {
+      createTargetRow();
+      scheduleSaveInputs();
+    });
     clearBtn.addEventListener("click", () => {
       resultsTable.innerHTML = "";
+      currentRows = [];
+      currentHeaders = [];
       setButtonsEnabled(false);
       clearLog();
       scrapeBtn.disabled = false;
+      updateSessionState({ results: { headers: [], rows: [] }, resume: null });
+    });
+    resetDefaultsBtn.addEventListener("click", () => {
+      resetToDefaults();
     });
     document.addEventListener("click", (event) => {
       const btn = event.target.closest("button");
@@ -1073,10 +1472,17 @@
         deletePreset: "Preset deleted",
         exportPreset: "Presets exported",
         importPreset: "Select a preset file",
-        stopScrape: "Stop requested"
+        stopScrape: "Stop requested",
+        resetDefaults: "Defaults restored"
       };
       if (messages[id]) showToast(messages[id]);
     });
+    urlsEl.addEventListener("input", scheduleSaveInputs);
+    headlessEl.addEventListener("change", scheduleSaveInputs);
+    blockResourcesEl.addEventListener("change", scheduleSaveInputs);
+    waitSelectorEl.addEventListener("input", scheduleSaveInputs);
+    waitTimeoutEl.addEventListener("input", scheduleSaveInputs);
+    frequencyEl.addEventListener("input", scheduleSaveInputs);
     presetSelect.addEventListener("change", () => {
       loadPreset(presetSelect.value);
     });
@@ -1098,16 +1504,43 @@
       importPresetsFromFile(file);
       importPresetFile.value = "";
     });
-
-    urlsEl.value = [
-      "https://www.bowtie.com.hk/blog/zh/learn/%E8%87%AA%E9%A1%98%E9%86%AB%E4%BF%9D-top-up-%E5%85%AC%E5%8F%B8%E9%86%AB%E4%BF%9D/",
-      "https://example.com"
-    ].join("\n");
-    frequencyEl.value = defaultFrequency;
+    bindExportButtons();
 
     const store = ensurePresetStore();
     renderPresetOptions(store, store.last || "Default");
-    loadPreset(store.last || "Default");
+
+    const session = readSessionState();
+    if (session?.inputs) {
+      applyInputsState(session.inputs);
+      if (!targetsEl.querySelector(".row")) {
+        loadPreset(presetSelect.value || store.last || "Default");
+      }
+    } else {
+      urlsEl.value = [
+        "https://example.com",
+        "https://example.org"
+      ].join("\n");
+      frequencyEl.value = defaultFrequency;
+      presetSelect.value = store.last || "Default";
+      loadPreset(presetSelect.value);
+    }
+
+    if (Array.isArray(session?.results?.rows) && session.results.rows.length) {
+      currentHeaders = Array.isArray(session.results.headers)
+        ? session.results.headers
+        : [];
+      currentRows = session.results.rows;
+      if (!currentHeaders.length && currentRows.length) {
+        const keys = Object.keys(currentRows[0] || {});
+        currentHeaders = keys.length ? keys : [];
+      }
+      if (currentHeaders.length) {
+        renderTable(currentHeaders, currentRows);
+        setButtonsEnabled(true);
+      }
+    }
+
+    saveInputsState();
   </script>
 </body>
 </html>
