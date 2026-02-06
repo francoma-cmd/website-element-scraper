@@ -1,6 +1,6 @@
 {
   "name": "website-element-scraper",
-  "version": "1.0.0",
+  "version": "1.0.1-beta.1",
   "private": true,
   "main": "main.js",
   "description": "Desktop app to scrape website element details and export CSV.",

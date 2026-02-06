@@ -1,0 +1,131 @@
+{
+  "last": "Default",
+  "presets": {
+    "Default": {
+      "targets": [
+        {
+          "label": "wp_slug",
+          "selector": "",
+          "mode": "slug",
+          "attr": ""
+        },
+        {
+          "label": "page_title",
+          "selector": "title",
+          "mode": "text",
+          "attr": ""
+        },
+        {
+          "label": "h1",
+          "selector": "h1",
+          "mode": "text",
+          "attr": ""
+        },
+        {
+          "label": "meta_description",
+          "selector": "meta[name=\"description\"]",
+          "mode": "attr",
+          "attr": "content"
+        },
+        {
+          "label": "canonical_url",
+          "selector": "link[rel=\"canonical\"]",
+          "mode": "attr",
+          "attr": "href"
+        },
+        {
+          "label": "date",
+          "selector": ".learn-post__info-item:last-child > span:last-child, .info__row:last-child > span:last-child",
+          "mode": "text",
+          "attr": ""
+        },
+        {
+          "label": "reviewer_name",
+          "selector": ".reviewer-tooltip__trigger, .info__row:nth-child(2) a",
+          "mode": "text",
+          "attr": ""
+        },
+        {
+          "label": "reviewer_url",
+          "selector": ".reviewer-tooltip__trigger, .info__row:nth-child(2) a",
+          "mode": "attr",
+          "attr": "href"
+        },
+        {
+          "label": "author_name",
+          "selector": ".post-author__name a",
+          "mode": "text",
+          "attr": ""
+        },
+        {
+          "label": "author_url",
+          "selector": ".post-author__name a",
+          "mode": "attr",
+          "attr": "href"
+        },
+        {
+          "label": "widget",
+          "selector": ".editor__widget *:not(iframe)",
+          "mode": "text",
+          "attr": ""
+        },
+        {
+          "label": "widget_iframe_url",
+          "selector": ".editor__widget iframe",
+          "mode": "attr",
+          "attr": "src"
+        },
+        {
+          "label": "cta_banner",
+          "selector": ".cta-banner__text",
+          "mode": "text",
+          "attr": ""
+        },
+        {
+          "label": "cta_banner_cta_url",
+          "selector": ".cta-banner__cta a.btn:last-child",
+          "mode": "attr",
+          "attr": "href"
+        },
+        {
+          "label": "sticky_promo",
+          "selector": ".promo-banner__inner",
+          "mode": "text",
+          "attr": ""
+        },
+        {
+          "label": "sticky_promo_cta_url",
+          "selector": ".promo-banner, .promo-banner a",
+          "mode": "attr",
+          "attr": "href"
+        },
+        {
+          "label": "h2",
+          "selector": "h2",
+          "mode": "text",
+          "attr": ""
+        },
+        {
+          "label": "hreflang",
+          "selector": "link[rel=\"alternate\"][hreflang]",
+          "mode": "hreflang",
+          "attr": ""
+        },
+        {
+          "label": "robots",
+          "selector": "meta[name=\"robots\"]",
+          "mode": "attr",
+          "attr": "content"
+        },
+        {
+          "label": "jsonld",
+          "selector": "script[type=\"application/ld+json\"]",
+          "mode": "jsonld",
+          "attr": ""
+        }
+      ],
+      "frequency": 0,
+      "concurrency": 3
+    }
+  }
+}
