@@ -2,8 +2,14 @@ name: Build Windows App
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to upload assets to (e.g. v1.0.1-beta.2). Leave blank to skip release upload."
+        required: false
+        type: string
   push:
     branches: ["main"]
+    tags: ["v*"]
 
 jobs:
   build-windows:
@@ -30,6 +36,35 @@ jobs:
 
       - name: Build Windows installer
         run: npm run dist
+
+      - name: Determine release tag
+        id: release_tag
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" && -n "${GITHUB_REF_NAME}" ]]; then
+            echo "tag=${GITHUB_REF_NAME}" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          if [[ -n "${{ inputs.tag }}" ]]; then
+            echo "tag=${{ inputs.tag }}" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          echo "tag=" >> "${GITHUB_OUTPUT}"
+
+      - name: Upload to GitHub Release
+        if: ${{ steps.release_tag.outputs.tag != '' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          prerelease: true
+          files: |
+            dist/*.exe
+            dist/*.msi
+            dist/*.zip
+            dist/*.yml
+            dist/*.blockmap
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
