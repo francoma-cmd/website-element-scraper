@@ -5,442 +5,424 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Website Element Scraper</title>
   <style>
-    :root {
-      --bg: #130b1b;
-      --panel: #21112f;
-      --panel-2: #2a1840;
-      --panel-3: #1b1029;
-      --ink: #f7f2ff;
-      --muted: #c6b4df;
-      --accent: #9b5cff;
-      --accent-2: #ff6fb1;
-      --line: #3a2a52;
-      --line-strong: #4c376c;
-      --shadow: 0 18px 40px rgba(12, 6, 20, 0.45);
-      --glow: 0 0 0 3px rgba(155, 92, 255, 0.28);
-      --radius-lg: 18px;
-      --radius-md: 14px;
-      --radius-sm: 10px;
+	    :root {
+      --bg: #071019;
+      --bg-soft: #0e1e2d;
+      --panel: #102336;
+      --panel-2: #0d1c2b;
+      --panel-3: #0a1724;
+      --ink: #ebf7ff;
+      --muted: #95b2c7;
+      --accent: #00b6ff;
+      --accent-strong: #0088cf;
+      --accent-warm: #ffb35c;
+      --danger: #ff6d82;
+      --line: #21435f;
+      --line-strong: #2f597c;
+      --radius-xl: 20px;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --shadow: 0 18px 40px rgba(1, 8, 14, 0.45);
+      --focus: 0 0 0 3px rgba(0, 182, 255, 0.28);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
     body {
       margin: 0;
-      background:
-        radial-gradient(900px 540px at 5% -5%, rgba(155, 92, 255, 0.35) 0%, rgba(155, 92, 255, 0) 65%),
-        radial-gradient(900px 540px at 100% 0%, rgba(255, 111, 177, 0.25) 0%, rgba(255, 111, 177, 0) 70%),
-        var(--bg);
+      min-height: 100%;
+    }
+
+    body {
       color: var(--ink);
-      font-family: "IBM Plex Sans", "Space Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+      font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+      background:
+        radial-gradient(900px 520px at 10% -10%, rgba(0, 182, 255, 0.26) 0%, rgba(0, 182, 255, 0) 70%),
+        radial-gradient(820px 460px at 100% 0%, rgba(255, 179, 92, 0.2) 0%, rgba(255, 179, 92, 0) 76%),
+        linear-gradient(180deg, #060f18 0%, #091624 100%);
+      letter-spacing: 0.01em;
     }
 
-    .wrap {
-      max-width: 1200px;
-      margin: 32px auto 64px;
-      padding: 0 20px;
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.055) 0.8px, transparent 0.8px);
+      background-size: 3px 3px;
+      opacity: 0.08;
+      z-index: 0;
     }
 
-    header {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 24px;
+    .shell {
+      position: relative;
+      z-index: 1;
+      max-width: 1450px;
+      margin: 26px auto 60px;
+      padding: 0 18px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: end;
+      margin-bottom: 18px;
+      animation: rise 0.5s ease both;
     }
 
     h1 {
-      font-family: "IBM Plex Serif", "Georgia", serif;
-      font-weight: 650;
+      margin: 0;
+      font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+      font-size: clamp(30px, 3.4vw, 42px);
       letter-spacing: -0.02em;
-      margin: 0;
-      font-size: clamp(28px, 3.5vw, 36px);
+      line-height: 1.05;
+      font-weight: 700;
     }
 
-    .sub {
+    .hero p {
+      margin: 8px 0 0;
       color: var(--muted);
-      margin: 0;
+      font-size: 14px;
+      max-width: 760px;
+      line-height: 1.45;
     }
 
-    .grid {
+    .hero-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .badge {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(0, 182, 255, 0.12), rgba(255, 179, 92, 0.08));
+      color: #cde9fa;
+      white-space: nowrap;
+    }
+
+    .layout {
       display: grid;
-      grid-template-columns: 1.1fr 1fr;
-      gap: 20px;
+      grid-template-columns: 1.16fr 1fr;
+      gap: 16px;
       align-items: start;
     }
 
     .card {
-      background: var(--panel);
+      background: linear-gradient(180deg, rgba(18, 35, 54, 0.95), rgba(12, 27, 42, 0.98));
       border: 1px solid var(--line);
-      border-radius: var(--radius-lg);
+      border-radius: var(--radius-xl);
       box-shadow: var(--shadow);
-      padding: 18px;
+      backdrop-filter: blur(4px);
+      overflow: hidden;
+      animation: rise 0.55s ease both;
     }
 
-    .card-header {
+    .card + .card {
+      margin-top: 16px;
+    }
+
+    .card-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 14px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
     }
 
-    .card-title {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-      margin: 0;
-    }
+	    .card-title {
+	      margin: 0;
+	      font-size: 14px;
+	      letter-spacing: -0.01em;
+	      text-transform: none;
+	      color: #c7e6f8;
+	      font-weight: 700;
+	    }
 
-    .card-subtitle {
-      font-size: 13px;
-      color: var(--muted);
+    .card-sub {
       margin: 6px 0 0;
-    }
-
-    .panel-section {
-      background: var(--panel-3);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-md);
-      padding: 12px;
-      margin-top: 12px;
-    }
-
-    label {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
       color: var(--muted);
-      display: block;
-      margin-bottom: 6px;
+      font-size: 13px;
+      line-height: 1.35;
     }
+
+    .card-body {
+      padding: 14px 16px 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .pane {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(8, 22, 35, 0.8), rgba(8, 20, 32, 0.92));
+      border-radius: var(--radius-lg);
+      padding: 12px;
+    }
+
+	    .pane-title {
+	      margin: 0 0 8px;
+	      font-size: 13px;
+	      letter-spacing: -0.01em;
+	      text-transform: none;
+	      color: #bcd9ee;
+	      font-weight: 700;
+	    }
+
+	    label {
+	      display: block;
+	      margin-bottom: 5px;
+	      font-size: 12px;
+	      letter-spacing: 0.01em;
+	      text-transform: none;
+	      color: var(--muted);
+	      font-weight: 600;
+	    }
 
     .label-title {
       text-transform: none;
       letter-spacing: 0.02em;
-    }
-
-    textarea,
-    input,
-    select {
-      width: 100%;
-      padding: 9px 12px;
-      border: 1px solid var(--line-strong);
-      border-radius: var(--radius-md);
-      font-size: 14px;
-      background: var(--panel-2);
-      color: var(--ink);
-      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-    }
-
-    textarea:focus,
-    input:focus,
-    select:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: var(--glow);
-      background: #2f1e46;
-    }
-
-    textarea { min-height: 160px; resize: vertical; }
-
-    .row {
-      display: grid;
-      grid-template-columns: 28px minmax(160px, 1.2fr) minmax(220px, 2.3fr) minmax(120px, 0.9fr) minmax(140px, 1fr) 32px;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 10px;
-      padding: 6px 8px;
-      border: 1px solid var(--line);
-      border-radius: var(--radius-md);
-      background: #27173b;
-    }
-
-    .row.dragging {
-      opacity: 0.6;
-      border-color: var(--accent);
-      box-shadow: var(--glow);
-    }
-
-    .row .drag-handle {
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--muted);
-      font-weight: 700;
-      cursor: grab;
-      font-size: 14px;
-      line-height: 1;
-      width: 24px;
-      height: 30px;
-      border-radius: 10px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-    }
-
-    .row .drag-handle:active {
-      cursor: grabbing;
-    }
-
-    .row .target-attr.is-ghost {
-      background: transparent;
-      border: 1px dashed rgba(255, 255, 255, 0.14);
-      color: var(--muted);
-    }
-
-    .row input,
-    .row select {
-      min-width: 0;
-      font-size: 13px;
-    }
-
-    .row input {
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      overflow: hidden;
-    }
-
-    .target-selector,
-    .target-attr {
-      font-family: "IBM Plex Mono", "Menlo", "Monaco", monospace;
-    }
-
-    .row .remove {
-      border: none;
-      background: rgba(255, 111, 177, 0.18);
-      color: var(--accent-2);
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 18px;
-      line-height: 1;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-
-    .actions.sticky {
-      position: sticky;
-      bottom: 12px;
-      background: linear-gradient(180deg, rgba(27, 16, 41, 0), rgba(27, 16, 41, 0.75) 40%, rgba(27, 16, 41, 0.95) 100%);
-      padding-top: 12px;
-      z-index: 2;
+      font-weight: 600;
+      color: #d8ecfb;
     }
 
     .field {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
+      min-width: 0;
     }
 
     .field-sub {
       font-size: 12px;
       color: var(--muted);
+      line-height: 1.35;
+      text-transform: none;
+      letter-spacing: 0;
     }
 
-    .checkbox-row {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
+    input,
+    textarea,
+    select {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--line-strong);
+      background: var(--panel-2);
+      color: var(--ink);
+      border-radius: var(--radius-md);
+      padding: 9px 11px;
       font-size: 13px;
-      color: var(--muted);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
     }
 
-    .checkbox-row input {
+    textarea {
+      min-height: 124px;
+      resize: vertical;
+      line-height: 1.4;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: var(--focus);
+      transform: translateY(-1px);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #6f8ba0;
+    }
+
+    .mono {
+      font-family: "JetBrains Mono", "Menlo", "Monaco", monospace;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 8px 10px;
+      background: rgba(8, 23, 36, 0.6);
+      text-transform: none;
+      letter-spacing: 0;
+      margin: 0;
+      font-size: 13px;
+      color: #cee7f6;
+    }
+
+    .checkbox input {
       width: 16px;
       height: 16px;
       margin: 0;
       accent-color: var(--accent);
     }
 
-    button {
-      border: none;
-      padding: 9px 16px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    .hidden {
+      display: none !important;
     }
 
-    button:hover {
+    .is-disabled {
+      opacity: 0.55;
+    }
+
+    .is-disabled * {
+      cursor: not-allowed;
+    }
+
+    .is-disabled a,
+    .is-disabled button {
+      pointer-events: none;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      background: var(--panel-2);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+
+    button:hover:enabled {
       transform: translateY(-1px);
-      box-shadow: 0 6px 14px rgba(15, 23, 32, 0.12);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+      box-shadow: none;
+      transform: none;
     }
 
     .primary {
-      background: linear-gradient(135deg, #8b5cf6, #ff6fb1);
-      color: #fff;
+      background: linear-gradient(135deg, #00b6ff, #0286cf);
+      border-color: rgba(0, 182, 255, 0.6);
+      color: #e7f8ff;
     }
 
     .secondary {
-      background: #2b193f;
-      color: var(--ink);
+      border-color: var(--line-strong);
+      background: #122a3f;
+      color: #dbf0ff;
     }
 
-    .note {
-      font-size: 12px;
+    .ghost {
+      border-color: var(--line);
+      background: rgba(255, 255, 255, 0.02);
       color: var(--muted);
-      margin-top: 8px;
-      line-height: 1.4;
     }
 
-    .toast {
-      position: fixed;
-      right: 24px;
-      bottom: 24px;
-      background: #2a1840;
-      color: var(--ink);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 10px 16px;
-      font-size: 13px;
-      box-shadow: var(--shadow);
-      opacity: 0;
-      transform: translateY(8px);
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      pointer-events: none;
-      z-index: 5;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
+    .warn {
+      border-color: rgba(255, 109, 130, 0.5);
+      background: rgba(255, 109, 130, 0.12);
+      color: #ffd4db;
     }
 
     .status {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 8px;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      padding: 10px 12px;
-      border-radius: var(--radius-md);
       border: 1px solid var(--line);
-      background: #241635;
-      height: 140px;
-      min-height: 140px;
-      max-height: 140px;
-      overflow: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
+      border-radius: var(--radius-md);
+      background: #0a1824;
+      padding: 10px;
       font-size: 12px;
-      table-layout: fixed;
-      min-width: 920px;
-    }
-
-    th, td {
-      border-bottom: 1px solid var(--line);
-      padding: 6px 10px;
-      text-align: left;
-      vertical-align: top;
-      line-height: 1.25;
-      word-break: break-word;
-      min-width: 120px;
-      max-width: 360px;
-    }
-
-    th:first-child,
-    td:first-child {
-      width: 320px;
-      min-width: 320px;
-    }
-
-    .cell {
-      display: -webkit-box;
-      -webkit-line-clamp: 5;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      max-height: calc(1.25em * 5);
-    }
-
-    td a.cell {
-      color: #ffd1f1;
-      text-decoration: none;
-    }
-
-    td a.cell:hover {
-      text-decoration: underline;
-    }
-
-    th {
-      position: sticky;
-      top: 0;
-      background: #26183a;
-      z-index: 1;
-      font-size: 11px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .table-wrap {
-      max-height: 360px;
+      color: #bdd7ea;
+      min-height: 150px;
+      max-height: 170px;
       overflow: auto;
-      overflow-x: auto;
-      border: 1px solid var(--line);
-      border-radius: var(--radius-md);
-      background: #241635;
-    }
-
-    .targets-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .targets-header label {
-      margin: 0;
-    }
-
-    .targets-list {
-      height: 100%;
-      overflow: auto;
-      padding-right: 4px;
-    }
-
-    .log-panel {
-      display: grid;
-      grid-template-rows: auto 140px auto auto;
-      gap: 10px;
-    }
-
-    .log-panel .status {
-      margin-top: 0;
+      white-space: pre-wrap;
+      line-height: 1.4;
     }
 
     .status-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 10px;
-      border-radius: var(--radius-md);
+      gap: 8px;
       border: 1px solid var(--line);
-      background: #221330;
+      border-radius: var(--radius-md);
+      padding: 8px 10px;
       font-size: 12px;
-      color: var(--muted);
+      color: #afcce0;
+      background: rgba(255, 255, 255, 0.02);
     }
 
-    .preset-bar {
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      padding: 5px 9px;
+      font-size: 11px;
+      color: #cde6f8;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .pill::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-warm);
+      box-shadow: 0 0 0 3px rgba(255, 179, 92, 0.18);
+    }
+
+    .pill.active::before {
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 182, 255, 0.18);
+    }
+
+    .targets-toolbar {
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 10px;
-      align-items: center;
-      margin-bottom: 12px;
+      align-items: end;
+    }
+
+    .preset-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
       align-items: end;
     }
 
@@ -448,153 +430,1391 @@
       display: flex;
       gap: 8px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .preset-actions input {
-      min-width: 160px;
+      min-width: 170px;
+    }
+
+    .targets-list {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: #091824;
+      max-height: 510px;
+      overflow: auto;
+      padding: 10px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 28px minmax(120px, 1.1fr) minmax(220px, 2fr) minmax(110px, 0.9fr) minmax(140px, 1fr) 58px 32px;
+      gap: 8px;
+      align-items: center;
+      border: 1px solid #27465f;
+      border-radius: var(--radius-md);
+      background: linear-gradient(180deg, #122638, #0f1e2d);
+      padding: 7px;
+      margin-bottom: 8px;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .row:hover {
+      border-color: #3a688d;
+    }
+
+    .row.is-active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0, 182, 255, 0.16);
+      background: linear-gradient(180deg, #142c42, #102539);
+    }
+
+    .row.dragging {
+      opacity: 0.55;
+      border-style: dashed;
+    }
+
+    .row input,
+    .row select {
+      font-size: 12px;
+      padding: 7px 9px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .drag-handle {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      width: 24px;
+      height: 28px;
+      border-radius: 9px;
+      cursor: grab;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      padding: 0;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .target-selector,
+    .target-attr {
+      font-family: "JetBrains Mono", "Menlo", "Monaco", monospace;
+    }
+
+    .target-attr.is-ghost {
+      border-style: dashed;
+      color: #7ea1bd;
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .pick {
+      border-color: rgba(0, 182, 255, 0.45);
+      background: rgba(0, 182, 255, 0.18);
+      color: #c8efff;
+      padding: 7px 9px;
+      border-radius: 9px;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .remove {
+      border: 1px solid rgba(255, 109, 130, 0.45);
+      background: rgba(255, 109, 130, 0.14);
+      color: #ffd9df;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      padding: 0;
+      font-size: 16px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .picker-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      margin-top: 8px;
+    }
+
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: #091824;
+      max-height: 420px;
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 980px;
+      table-layout: fixed;
+      font-size: 12px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #1d3850;
+      padding: 7px 10px;
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.3;
+      word-break: break-word;
+      min-width: 120px;
+      max-width: 340px;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #0d2234;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #b4d0e4;
+    }
+
+    th:first-child,
+    td:first-child {
+      width: 290px;
+      min-width: 290px;
+    }
+
+    .cell {
+      display: -webkit-box;
+      -webkit-line-clamp: 5;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      max-height: calc(1.3em * 5);
+    }
+
+    .cell-link {
+      color: #8fd7ff;
+      text-decoration: none;
+    }
+
+    .cell-link:hover {
+      text-decoration: underline;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      border: 1px solid rgba(0, 182, 255, 0.5);
+      background: rgba(10, 28, 45, 0.95);
+      color: #d2edff;
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      transform: translateY(8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1220px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .targets-list {
+        max-height: 400px;
+      }
+    }
+
+    @media (max-width: 920px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-badges {
+        justify-content: flex-start;
+      }
+
+      .grid-3,
+      .grid-2,
+      .checkbox-grid,
+      .targets-toolbar,
+      .preset-row {
+        grid-template-columns: 1fr;
+      }
+
+      .row {
+        grid-template-columns: 24px 1fr 1fr 1fr;
+      }
+
+      .row .target-attr,
+      .row .pick,
+      .row .remove {
+        grid-column: 1 / -1;
+      }
+
+      .row .remove {
+        justify-self: end;
+      }
+    }
+
+    /* Simple UI overrides */
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --panel-2: #f8fafc;
+      --ink: #1d2a38;
+      --muted: #5f6f82;
+	      --accent: #2962d9;
+	      --accent-strong: #204fb3;
+	      --accent-soft: #e8f0ff;
+	      --accent-soft-strong: #d7e5ff;
+	      --accent-warm: #5d88df;
+	      --danger: #d95367;
+      --line: #d8e2ef;
+      --line-strong: #c4d2e3;
+      --shadow: 0 6px 22px rgba(15, 27, 44, 0.08);
+      --focus: 0 0 0 3px rgba(41, 98, 217, 0.2);
+      --radius-xl: 14px;
+      --radius-lg: 10px;
+      --radius-md: 8px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    .grain,
+    .hero-badges {
+      display: none;
+    }
+
+	    .shell {
+	      max-width: 1380px;
+	      margin: 20px auto 34px;
+	      padding: 0 14px;
+	    }
+
+	    .hero {
+	      margin-bottom: 12px;
+	      grid-template-columns: 1fr auto;
+	      gap: 2px;
+	      align-items: start;
+	    }
+
+	    .topbar {
+	      position: sticky;
+	      top: 10px;
+	      z-index: 20;
+	      background: rgba(244, 247, 251, 0.92);
+	      backdrop-filter: blur(10px);
+	      border: 1px solid var(--line);
+	      border-radius: var(--radius-xl);
+	      box-shadow: var(--shadow);
+	      padding: 10px 12px;
+	      display: grid;
+	      grid-template-columns: 1fr auto;
+	      gap: 10px;
+	      align-items: center;
+	      margin: 10px 0 12px;
+	    }
+
+	    .topbar .group {
+	      display: flex;
+	      gap: 10px;
+	      align-items: center;
+	      flex-wrap: wrap;
+	      min-width: 0;
+	    }
+
+	    .topbar .group-title {
+	      font-size: 12px;
+	      font-weight: 700;
+	      color: #2b3e56;
+	      letter-spacing: -0.01em;
+	      margin-right: 2px;
+	      white-space: nowrap;
+	    }
+
+	    .tabs {
+	      display: flex;
+	      gap: 8px;
+	      align-items: center;
+	      padding: 6px;
+	      border-radius: 12px;
+	      border: 1px solid var(--line);
+	      background: #f3f7ff;
+	    }
+
+	    .tab-btn {
+	      padding: 8px 12px;
+	      border-radius: 10px;
+	      background: transparent;
+	      border-color: transparent;
+	      color: #2d476d;
+	      font-weight: 700;
+	      box-shadow: none;
+	    }
+
+	    .tab-btn:hover:enabled {
+	      transform: none;
+	      box-shadow: none;
+	      background: rgba(255, 255, 255, 0.75);
+	      border-color: rgba(196, 210, 227, 0.7);
+	    }
+
+	    .tab-btn.active {
+	      background: linear-gradient(180deg, var(--accent-soft), var(--accent-soft-strong));
+	      color: var(--accent-strong);
+	      border-color: rgba(41, 98, 217, 0.35);
+	      box-shadow: inset 0 0 0 1px rgba(41, 98, 217, 0.18);
+	    }
+
+	    .tab-panel {
+	      display: none;
+	    }
+
+	    .tab-panel.active {
+	      display: block;
+	    }
+
+	    .stack {
+	      display: grid;
+	      gap: 10px;
+	    }
+
+	    @media (max-width: 920px) {
+	      .topbar {
+	        grid-template-columns: 1fr;
+	        top: 8px;
+	      }
+	      .topbar .group {
+	        justify-content: flex-start;
+	      }
+	    }
+
+    h1 {
+      font-family: "Avenir Next", "Gill Sans", sans-serif;
+      font-size: clamp(28px, 2.4vw, 34px);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+    }
+
+    .hero p {
+      color: var(--muted);
+      max-width: 980px;
+      margin-top: 2px;
+      font-size: 13px;
+    }
+
+	    .layout {
+	      grid-template-columns: 1fr;
+	      gap: 10px;
+	    }
+
+	    /* Tabs layout replaces old 2-col layout */
+	    main.layout {
+	      display: block;
+	    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius-xl);
+      backdrop-filter: none;
+      animation: none;
+    }
+
+    .card-head {
+      background: #f8fbff;
+      border-bottom: 1px solid var(--line);
+      padding: 12px 14px;
+    }
+
+	    .card-title {
+	      color: #1f3854;
+	      letter-spacing: -0.01em;
+	      font-size: 14px;
+	      font-weight: 700;
+	      text-transform: none;
+	    }
+
+    .card-sub {
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .card-body {
+      padding: 12px 14px 14px;
+      gap: 8px;
+    }
+
+    .pane {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 9px;
+    }
+
+	    .pane-title {
+	      color: #355173;
+	      margin-bottom: 6px;
+	      letter-spacing: -0.01em;
+	      font-size: 13px;
+	      font-weight: 700;
+	      text-transform: none;
+	    }
+
+    .label-title {
+      color: #2f435a;
+    }
+
+    .field-sub {
+      color: #6a7d94;
+    }
+
+    input,
+    textarea,
+    select {
+      background: #ffffff;
+      border: 1px solid var(--line-strong);
+      color: var(--ink);
+      border-radius: var(--radius-md);
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #91a1b5;
+    }
+
+    .checkbox {
+      background: #ffffff;
+      border-color: var(--line-strong);
+      color: #30465f;
+    }
+
+	    button {
+	      color: #213142;
+	      background: #ffffff;
+	      border-color: var(--line-strong);
+	      box-shadow: none;
+	      padding: 8px 12px;
+	      font-size: 12px;
+	    }
+
+	    button:hover:enabled {
+	      box-shadow: 0 6px 14px rgba(15, 27, 44, 0.08);
+	      transform: translateY(-1px);
+	    }
+
+	    .primary {
+	      background: var(--accent);
+	      border-color: var(--accent);
+	      color: #ffffff;
+	      box-shadow: 0 8px 18px rgba(41, 98, 217, 0.18);
+	    }
+
+	    .primary:hover:enabled {
+	      background: var(--accent-strong);
+	      border-color: var(--accent-strong);
+	      box-shadow: 0 10px 22px rgba(32, 79, 179, 0.22);
+	    }
+
+    .secondary {
+      background: #edf3ff;
+      border-color: #c7d7f5;
+      color: #27497d;
     }
 
     .ghost {
-      background: transparent;
-      color: var(--muted);
+      background: #ffffff;
+      border-color: var(--line-strong);
+      color: #4e647d;
+    }
+
+    .warn {
+      background: #fff4f6;
+      border-color: #f1c4cc;
+      color: #9b3647;
+    }
+
+	    .run-profile-bar {
+	      display: grid;
+	      grid-template-columns: repeat(4, minmax(0, 1fr));
+	      gap: 8px;
+	      margin-bottom: 8px;
+	      padding: 6px;
+	      border-radius: 12px;
+	      border: 1px solid var(--line);
+	      background: #f3f7ff;
+	    }
+
+	    .profile-btn {
+	      font-size: 12px;
+	      font-weight: 600;
+	      border-color: transparent;
+	      background: transparent;
+	      color: #2d476d;
+	      box-shadow: none;
+	      border-radius: 10px;
+	    }
+
+	    .profile-btn:hover:enabled {
+	      transform: none;
+	      box-shadow: none;
+	      background: rgba(255, 255, 255, 0.7);
+	      border-color: rgba(196, 210, 227, 0.7);
+	    }
+
+	    .profile-btn.active {
+	      background: linear-gradient(180deg, var(--accent-soft), var(--accent-soft-strong));
+	      color: var(--accent-strong);
+	      border-color: rgba(41, 98, 217, 0.35);
+	      box-shadow: inset 0 0 0 1px rgba(41, 98, 217, 0.18);
+	    }
+
+    .urls-block {
+      display: grid;
+      gap: 6px;
+    }
+
+    .status {
+      background: #ffffff;
+      border-color: var(--line);
+      color: #425a74;
+      min-height: 122px;
+      max-height: 150px;
+    }
+
+    .run-state-card {
       border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: #ffffff;
+      padding: 8px 10px;
+      display: grid;
+      gap: 8px;
     }
 
-
-    @media (max-width: 980px) {
-      .grid { grid-template-columns: 1fr; }
-      .row {
-        grid-template-columns: 1fr 1fr 1fr 1fr 32px;
-      }
+    .run-state-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    @media (max-width: 720px) {
-      .row {
+    .run-state-badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 9px;
+      color: #4a6078;
+      background: #f6f9fd;
+    }
+
+    .run-state-badge.running {
+      color: #1f5bc9;
+      border-color: #b7cbf3;
+      background: #eef4ff;
+    }
+
+    .run-state-badge.completed {
+      color: #20774e;
+      border-color: #bfe6d2;
+      background: #edf9f2;
+    }
+
+    .run-state-badge.stopped {
+      color: #8a6422;
+      border-color: #f0ddb6;
+      background: #fff7e7;
+    }
+
+    .run-state-badge.failed {
+      color: #a23849;
+      border-color: #f1c2ca;
+      background: #fff2f4;
+    }
+
+    .run-summary-text {
+      font-size: 12px;
+      color: #5d7087;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: #edf2f8;
+      overflow: hidden;
+      border: 1px solid #dde6f1;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #9ab8ee, #2962d9);
+      transition: width 0.2s ease;
+    }
+
+    .run-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .run-stats .stat {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 11px;
+      color: #6a7e96;
+    }
+
+    .run-stats .stat strong {
+      color: #2f4b69;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-preset {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      min-width: min(54vw, 620px);
+    }
+
+    .preset-compact {
+      display: grid;
+      grid-template-columns: minmax(120px, 1fr) minmax(140px, 1fr) auto;
+      gap: 6px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .preset-compact input,
+    .preset-compact select {
+      height: 33px;
+    }
+
+    .preset-manage {
+      width: 100%;
+    }
+
+    .preset-manage summary {
+      text-align: right;
+      padding: 4px 0;
+      font-size: 11px;
+      color: #607894;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .preset-manage[open] summary {
+      color: #355981;
+    }
+
+    .preset-manage-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding-top: 4px;
+    }
+
+    .status-bar {
+      background: #ffffff;
+      border-color: var(--line);
+      color: #576d84;
+    }
+
+    .pill {
+      background: #eef3fa;
+      border-color: var(--line);
+      color: #445d79;
+    }
+
+    .pill::before {
+      background: #9aacbf;
+      box-shadow: none;
+    }
+
+    .pill.active::before {
+      background: var(--accent);
+      box-shadow: none;
+    }
+
+    .expand {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    .expand summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #2f4b69;
+      border-bottom: 1px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .expand summary::after {
+      content: "+";
+      color: #6f87a1;
+      font-size: 16px;
+      line-height: 1;
+      font-weight: 700;
+    }
+
+    .expand[open] summary::after {
+      content: "−";
+      color: #456e9e;
+    }
+
+    .expand[open] summary {
+      border-bottom-color: var(--line);
+      background: #f8fbff;
+    }
+
+    .expand-content {
+      display: grid;
+      gap: 10px;
+      padding: 10px;
+      background: #fcfdff;
+    }
+
+    .targets-list {
+      background: #ffffff;
+      border-color: var(--line);
+      max-height: 420px;
+    }
+
+    .row {
+      background: #ffffff;
+      border-color: var(--line-strong);
+      border-radius: var(--radius-md);
+      grid-template-columns: 26px minmax(120px, 1fr) minmax(180px, 1.6fr) minmax(100px, 0.8fr) minmax(120px, 0.9fr) 52px 30px;
+      margin-bottom: 6px;
+      padding: 6px;
+    }
+
+    .row:hover {
+      border-color: #a8bdd7;
+    }
+
+    .row.is-active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(41, 98, 217, 0.14);
+      background: #f8fbff;
+    }
+
+    .row input,
+    .row select {
+      background: #ffffff;
+      border-color: var(--line-strong);
+      color: #24364a;
+    }
+
+    .drag-handle {
+      background: #f1f5fb;
+      border-color: var(--line-strong);
+      color: #67819f;
+    }
+
+    .target-attr.is-ghost {
+      background: #f8fafc;
+      border-color: var(--line);
+      color: #8ca0b7;
+    }
+
+    .pick {
+      background: #eef3ff;
+      border-color: #cad8f5;
+      color: #294d87;
+      border-radius: 8px;
+    }
+
+    .remove {
+      background: #fff5f6;
+      border-color: #f2c6cd;
+      color: #b74658;
+    }
+
+    .picker-note {
+      color: #60748b;
+    }
+
+    .table-wrap {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      max-height: 360px;
+      overflow-x: auto;
+      overflow-y: auto;
+    }
+
+    table {
+      width: max-content;
+      min-width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: auto;
+      font-size: 12px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #e4ebf3;
+      min-width: 135px;
+      max-width: 240px;
+      white-space: nowrap;
+      padding: 7px 9px;
+      color: #29415a;
+    }
+
+    th {
+      background: #f6f9fe;
+      color: #3a5574;
+      top: 0;
+      z-index: 3;
+    }
+
+    th:first-child,
+    td:first-child {
+      min-width: 340px;
+      width: 340px;
+      max-width: 460px;
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background: #ffffff;
+    }
+
+    th:first-child {
+      z-index: 4;
+      background: #f6f9fe;
+    }
+
+    .cell {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      max-width: 220px;
+      white-space: normal;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.35;
+      max-height: calc(1.35em * 2);
+    }
+
+    td:first-child .cell {
+      max-width: 430px;
+    }
+
+    .cell-link {
+      color: #1f5bc9;
+    }
+
+    .toast {
+      background: #ffffff;
+      border-color: #cad8ec;
+      color: #304a68;
+      box-shadow: 0 8px 28px rgba(20, 40, 65, 0.12);
+    }
+
+    @media (max-width: 1220px) {
+      .layout {
         grid-template-columns: 1fr;
       }
-      .row .remove { justify-self: end; }
+
+      .run-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      th:first-child,
+      td:first-child {
+        position: static;
+      }
+
+      .hero-preset {
+        min-width: 100%;
+        align-items: stretch;
+      }
+
+      .preset-compact {
+        grid-template-columns: 1fr;
+      }
+
+      .preset-manage summary,
+      .preset-manage-row {
+        justify-content: flex-start;
+        text-align: left;
+      }
+
+      .run-profile-bar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>Website Element Scraper</h1>
-      <p class="sub">Paste URLs, add target selectors, then export everything to CSV.</p>
-    </header>
+  <div class="grain"></div>
+	  <div class="shell">
+	    <header class="hero">
+	      <div>
+	        <h1>Website Element Scraper</h1>
+	        <p>
+	          Paste URLs, scrape, and export. Open advanced sections only when needed.
+	        </p>
+	      </div>
+	    </header>
 
-    <div class="grid">
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <p class="card-title">Scrape Setup</p>
-            <p class="card-subtitle">Enter URLs and tune the scrape cadence.</p>
-          </div>
-        </div>
+	    <div class="topbar" role="region" aria-label="Quick setup and run controls">
+	      <div class="group" style="min-width: 0;">
+	        <div class="group-title">Quick setup</div>
+	        <div class="run-profile-bar" style="margin: 0;">
+	          <button type="button" class="ghost profile-btn" data-run-profile="fast">Fast</button>
+	          <button type="button" class="ghost profile-btn active" data-run-profile="balanced">Balanced</button>
+	          <button type="button" class="ghost profile-btn" data-run-profile="stealth">Stealth</button>
+	          <button type="button" class="ghost profile-btn" data-run-profile="recovery">Recovery</button>
+	        </div>
+	      </div>
+	      <div class="group" style="justify-content: flex-end;">
+	        <button class="primary" id="scrape">Scrape</button>
+	        <button class="secondary" id="stopScrape">Stop</button>
+	        <button class="secondary" id="clear">Clear Results</button>
+	      </div>
+	    </div>
 
-        <div class="panel-section">
-          <label for="urls">List of URLs (one per line)</label>
-          <textarea id="urls" placeholder="https://example.com&#10;https://example.org"></textarea>
-        </div>
+	    <main class="layout">
+	      <div class="tabs" role="tablist" aria-label="Main tabs">
+	        <button type="button" class="tab-btn active" id="tabTarget" role="tab" aria-selected="true" aria-controls="panelTarget">Target</button>
+	        <button type="button" class="tab-btn" id="tabSettings" role="tab" aria-selected="false" aria-controls="panelSettings">Settings</button>
+	        <button type="button" class="tab-btn" id="tabResults" role="tab" aria-selected="false" aria-controls="panelResults">Results</button>
+	      </div>
 
-        <div class="panel-section">
-          <label class="checkbox-row" style="text-transform:none; letter-spacing:0;">
-            <input id="headless" type="checkbox" checked />
-            <span>Run headless (uncheck to show browser window)</span>
-          </label>
+	      <section class="tab-panel active" id="panelTarget" role="tabpanel" aria-labelledby="tabTarget">
+	        <div class="stack">
+	          <section class="card">
+	            <div class="card-head">
+	              <div>
+	                <p class="card-title">URLs</p>
+	                <p class="card-sub">One per line. These are the pages the scraper will visit.</p>
+	              </div>
+	            </div>
+	            <div class="card-body">
+	              <div class="urls-block">
+	                <label for="urls" class="label-title">Target URLs</label>
+	                <textarea id="urls" placeholder="https://example.com&#10;https://example.org"></textarea>
+	              </div>
+	            </div>
+	          </section>
 
-          <label class="checkbox-row" style="text-transform:none; letter-spacing:0; margin-top: 10px;">
-            <input id="renderJs" type="checkbox" checked />
-            <span>Render JavaScript (needed for dynamic elements)</span>
-          </label>
+	          <section class="card">
+	            <div class="card-head">
+	              <div>
+	                <p class="card-title">Targets</p>
+	                <p class="card-sub">Choose which fields to extract and use the picker to capture selectors.</p>
+	              </div>
+	            </div>
+	            <div class="card-body">
+	              <details class="expand">
+	                <summary>Selector picker</summary>
+	                <div class="expand-content">
+	                  <div class="targets-toolbar">
+	                    <div class="field">
+	                      <label for="pickerUrl" class="label-title">Picker URL</label>
+	                      <input id="pickerUrl" type="text" placeholder="Uses first URL if empty" />
+	                    </div>
+	                    <div class="actions">
+	                      <button class="secondary" id="startPicker">Start Picker</button>
+	                      <button class="warn" id="stopPicker" disabled>Stop Picker</button>
+	                    </div>
+	                  </div>
+	                  <div class="picker-note">
+	                    Click a row's <span class="mono">Pick</span> button, then click an element in the picker browser.
+	                  </div>
+	                </div>
+	              </details>
 
-          <label class="checkbox-row" style="text-transform:none; letter-spacing:0; margin-top: 10px;">
-            <input id="blockResources" type="checkbox" checked />
-            <span>Block images/fonts/media/stylesheets</span>
-          </label>
+	              <details class="expand" open>
+	                <summary>Target columns</summary>
+	                <div class="expand-content">
+	                  <div class="actions" style="justify-content: flex-end;">
+	                    <button class="secondary" id="addTarget">Add Target</button>
+	                  </div>
+	                  <div class="targets-list" id="targets"></div>
+	                </div>
+	              </details>
+	            </div>
+	          </section>
+	        </div>
+	      </section>
 
-          <div class="field" style="margin-top: 12px;" id="waitSelectorField">
-            <label for="waitSelector" class="label-title">Wait For Selector (optional)</label>
-            <input id="waitSelector" type="text" placeholder="CSS selector" />
-          </div>
+	      <section class="tab-panel" id="panelSettings" role="tabpanel" aria-labelledby="tabSettings">
+	        <div class="stack">
+	          <section class="card">
+	            <div class="card-head">
+	              <div>
+	                <p class="card-title">Preset panel</p>
+	                <p class="card-sub">Save and reuse targets + run settings together.</p>
+	              </div>
+	              <div class="actions">
+	                <button class="ghost" id="resetDefaults">Reset Defaults</button>
+	              </div>
+	            </div>
+	            <div class="card-body">
+	              <div class="preset-compact">
+	                <select id="presetSelect"></select>
+	                <input id="presetName" type="text" placeholder="Save as preset name" />
+	                <button class="secondary" id="savePreset">Save</button>
+	              </div>
+	              <details class="preset-manage">
+	                <summary>Preset actions</summary>
+	                <div class="preset-manage-row">
+	                  <button class="ghost" id="deletePreset">Delete</button>
+	                  <button class="ghost" id="exportPreset">Export</button>
+	                  <button class="ghost" id="importPreset">Import</button>
+	                  <input id="importPresetFile" type="file" accept="application/json" style="display:none;" />
+	                </div>
+	              </details>
+	            </div>
+	          </section>
 
-          <div class="field" style="margin-top: 12px;" id="waitTimeoutField">
-            <label for="waitTimeout" class="label-title">Wait Timeout (Seconds)</label>
-            <div class="field-sub">If selector is set, max time to wait. If empty, extra delay after load.</div>
-            <input id="waitTimeout" type="number" min="0" step="1" value="0" />
-          </div>
+	          <section class="card">
+	            <div class="card-head">
+	              <div>
+	                <p class="card-title">Settings</p>
+	                <p class="card-sub">Open only what you need.</p>
+	              </div>
+	            </div>
+	            <div class="card-body">
+	              <details class="expand" open>
+	                <summary>Execution</summary>
+	                <div class="expand-content">
+	                  <div class="pane">
+	                    <div class="checkbox-grid" style="margin-bottom: 10px;">
+	                      <label class="checkbox"><input id="headless" type="checkbox" checked />Headless mode</label>
+	                      <label class="checkbox"><input id="renderJs" type="checkbox" checked />Render JavaScript</label>
+	                      <label class="checkbox"><input id="blockResources" type="checkbox" checked />Block media/assets</label>
+	                      <label class="checkbox"><input id="artifactsEnabled" type="checkbox" />Save failure artifacts</label>
+	                    </div>
 
-          <div class="field" style="margin-top: 12px;">
-            <label for="frequency" class="label-title">Scrape Frequency (Seconds)</label>
-            <div class="field-sub">Delay between each URL fetch.</div>
-            <input id="frequency" type="number" min="0" step="0.5" />
-          </div>
-        </div>
+	                    <div class="grid-3">
+	                      <div class="field">
+	                        <label for="concurrency" class="label-title">Concurrency</label>
+	                        <input id="concurrency" type="number" min="1" max="12" step="1" value="3" />
+	                      </div>
+	                      <div class="field">
+	                        <label for="frequency" class="label-title">Global delay (s)</label>
+	                        <input id="frequency" type="number" min="0" max="60" step="0.1" value="0" />
+	                      </div>
+	                      <div class="field">
+	                        <label for="perDomainDelay" class="label-title">Per-domain delay (s)</label>
+	                        <input id="perDomainDelay" type="number" min="0" max="120" step="0.1" value="0" />
+	                      </div>
+	                    </div>
 
-        <div class="actions sticky">
-          <button class="primary" id="scrape">Scrape</button>
-          <button class="secondary" id="stopScrape">Stop</button>
-          <button class="secondary" id="clear">Clear Results</button>
-        </div>
+	                    <div class="grid-3" style="margin-top: 10px;">
+	                      <div class="field">
+	                        <label for="maxRequests" class="label-title">Max requests</label>
+	                        <input id="maxRequests" type="number" min="0" step="1" value="0" />
+	                        <div class="field-sub">0 = no cap</div>
+	                      </div>
+	                      <div class="field">
+	                        <label for="requestTimeout" class="label-title">Request timeout (s)</label>
+	                        <input id="requestTimeout" type="number" min="2" max="240" step="1" value="30" />
+	                      </div>
+	                      <div class="field">
+	                        <label for="waitTimeout" class="label-title">Post-load wait (s)</label>
+	                        <input id="waitTimeout" type="number" min="0" max="120" step="1" value="0" />
+	                      </div>
+	                    </div>
 
-        <div class="panel-section log-panel">
-          <label style="margin-bottom: 8px;">Run Log</label>
-          <div id="status" class="status"></div>
-          <div class="status-bar">
-            <div id="progressText">0 / 0</div>
-            <div id="etaText">ETA: --</div>
-          </div>
-          <div class="note" style="margin-top: 10px;">
-            Tip: some sites block headless browsers. If you see failures, uncheck headless to run visibly.
-          </div>
-        </div>
-        <div class="panel-section">
-          <button class="ghost" id="resetDefaults">Reset to Defaults</button>
-        </div>
-      </div>
+	                    <div class="field" id="waitSelectorField" style="margin-top: 10px;">
+	                      <label for="waitSelector" class="label-title">Wait for selector</label>
+	                      <input id="waitSelector" class="mono" type="text" placeholder="CSS selector" />
+	                      <div class="field-sub">If set, each page waits for this selector before extraction.</div>
+	                    </div>
+	                  </div>
+	                </div>
+	              </details>
 
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <p class="card-title">Targets</p>
-            <p class="card-subtitle">Adjust selectors or add new fields.</p>
-          </div>
-          <button class="secondary" id="addTarget">Add Target</button>
-        </div>
-        <div class="preset-bar">
-          <div class="field">
-            <label for="presetSelect" class="label-title">Preset</label>
-            <select id="presetSelect"></select>
-          </div>
-          <div class="preset-actions">
-            <input id="presetName" type="text" placeholder="New preset name" />
-            <button class="secondary" id="savePreset">Save</button>
-            <button class="ghost" id="deletePreset">Delete</button>
-            <button class="ghost" id="exportPreset">Export</button>
-            <button class="ghost" id="importPreset">Import</button>
-            <input id="importPresetFile" type="file" accept="application/json" style="display:none;" />
-          </div>
-        </div>
-        <div id="targets" class="targets-list"></div>
-      </div>
-    </div>
+	              <details class="expand">
+	                <summary>Retries</summary>
+	                <div class="expand-content">
+	                  <div class="pane">
+	                    <div class="grid-2">
+	                      <div class="field">
+	                        <label for="retryCount" class="label-title">Retry count</label>
+	                        <input id="retryCount" type="number" min="0" max="8" step="1" value="2" />
+	                      </div>
+	                      <div class="field">
+	                        <label for="retryBackoff" class="label-title">Backoff base (ms)</label>
+	                        <input id="retryBackoff" type="number" min="100" max="20000" step="100" value="700" />
+	                      </div>
+	                    </div>
+	                    <div class="field-sub" style="margin-top: 8px;">
+	                      Retryable failures (network/timeout/5xx/429) use exponential backoff with jitter.
+	                    </div>
+	                  </div>
+	                </div>
+	              </details>
 
-    <div class="card" style="margin-top: 20px;">
-      <div class="card-header">
-        <div>
-          <p class="card-title">Results</p>
-          <p class="card-subtitle">Review and export the scraped data.</p>
-        </div>
-        <div class="actions" style="margin-top: 0;">
-          <button class="secondary" id="copyCsv" disabled>Copy Table</button>
-          <button class="secondary" id="downloadCsv" disabled>Download CSV</button>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table id="results"></table>
-      </div>
-    </div>
-  </div>
+	              <details class="expand">
+	                <summary>Bot challenges and proxy fallback</summary>
+	                <div class="expand-content">
+	                  <div class="pane">
+	                    <p class="field-sub" style="margin: 0 0 10px;">
+	                      Direct scraping is always first. Proxy is only used as a fallback after repeated challenge signals per domain.
+	                    </p>
+	                    <label class="checkbox">
+	                      <input id="botGuardEnabled" type="checkbox" checked />
+	                      Detect bot challenge pages
+	                    </label>
+	                    <label class="checkbox">
+	                      <input id="proxyFallbackEnabled" type="checkbox" />
+	                      Enable proxy fallback (domain-based)
+	                    </label>
+
+	                    <div id="botGuardFields" style="margin-top: 10px;">
+	                      <div class="grid-2">
+	                        <div class="field">
+	                          <label for="directHardenRetries" class="label-title">Direct hardening retries</label>
+	                          <input id="directHardenRetries" type="number" min="0" max="3" step="1" value="1" />
+	                        </div>
+	                        <div class="field">
+	                          <label for="challengeStatusCodes" class="label-title">Challenge HTTP codes</label>
+	                          <input id="challengeStatusCodes" class="mono" type="text" value="403,429,503" placeholder="403,429,503" />
+	                        </div>
+	                      </div>
+	                      <div class="field" style="margin-top: 10px;">
+	                        <label for="challengeSignals" class="label-title">Challenge keywords</label>
+	                        <input id="challengeSignals" class="mono" type="text" value="cloudflare,captcha,verify you are human,access denied,cf-chl" />
+	                      </div>
+	                    </div>
+
+	                    <div id="proxyFallbackFields" style="margin-top: 10px;">
+	                      <div class="grid-3">
+	                        <div class="field">
+	                          <label for="domainChallengeThreshold" class="label-title">Challenge hits per domain</label>
+	                          <input id="domainChallengeThreshold" type="number" min="1" max="8" step="1" value="2" />
+	                        </div>
+	                        <div class="field">
+	                          <label for="proxyAttemptsPerUrl" class="label-title">Proxy attempts per URL</label>
+	                          <input id="proxyAttemptsPerUrl" type="number" min="1" max="8" step="1" value="2" />
+	                        </div>
+	                        <div class="field">
+	                          <label for="proxyListSummary" class="label-title">Proxy list</label>
+	                          <input id="proxyListSummary" class="mono" type="text" placeholder="0 proxies configured" disabled />
+	                        </div>
+	                      </div>
+
+	                      <div class="checkbox-grid" style="margin-top: 10px;">
+	                        <label class="checkbox"><input id="proxyStickyPerDomain" type="checkbox" checked />Sticky proxy per domain</label>
+	                        <label class="checkbox"><input id="proxyRotateOnFailure" type="checkbox" checked />Rotate proxy after failed proxy attempt</label>
+	                      </div>
+
+	                      <div class="field" style="margin-top: 10px;">
+	                        <label for="proxyList" class="label-title">Proxy list (one per line)</label>
+	                        <textarea id="proxyList" class="mono" style="min-height: 90px;" placeholder="http://user:pass@proxy-host:port"></textarea>
+	                      </div>
+	                    </div>
+	                  </div>
+	                </div>
+	              </details>
+
+	              <details class="expand">
+	                <summary>Auth and session</summary>
+	                <div class="expand-content">
+	                  <div class="pane">
+	                    <div class="grid-2">
+	                      <div class="field">
+	                        <label for="authHeaders" class="label-title">Custom headers</label>
+	                        <textarea id="authHeaders" class="mono" style="min-height: 100px;" placeholder="User-Agent: ...&#10;Authorization: Bearer ..."></textarea>
+	                      </div>
+	                      <div class="field">
+	                        <label for="authCookies" class="label-title">Cookies</label>
+	                        <textarea id="authCookies" class="mono" style="min-height: 100px;" placeholder="session_id=abc123; domain=.example.com; path=/; secure"></textarea>
+	                      </div>
+	                    </div>
+	                    <label class="checkbox" style="margin-top: 10px;">
+	                      <input id="loginEnabled" type="checkbox" />
+	                      Run login pre-step before scraping
+	                    </label>
+	                    <div id="loginFields" class="grid-2 hidden" style="margin-top: 10px;">
+	                      <div class="field">
+	                        <label for="loginUrl" class="label-title">Login URL</label>
+	                        <input id="loginUrl" type="text" placeholder="https://example.com/login" />
+	                      </div>
+	                      <div class="field">
+	                        <label for="loginWaitSeconds" class="label-title">Post submit wait (s)</label>
+	                        <input id="loginWaitSeconds" type="number" min="0" max="30" step="1" value="2" />
+	                      </div>
+	                      <div class="field">
+	                        <label for="loginUsername" class="label-title">Username</label>
+	                        <input id="loginUsername" type="text" placeholder="user@example.com" />
+	                      </div>
+	                      <div class="field">
+	                        <label for="loginPassword" class="label-title">Password</label>
+	                        <input id="loginPassword" type="password" placeholder="••••••••" />
+	                      </div>
+	                      <div class="field">
+	                        <label for="loginUsernameSelector" class="label-title">Username selector</label>
+	                        <input id="loginUsernameSelector" class="mono" type="text" placeholder="#email" />
+	                      </div>
+	                      <div class="field">
+	                        <label for="loginPasswordSelector" class="label-title">Password selector</label>
+	                        <input id="loginPasswordSelector" class="mono" type="text" placeholder="#password" />
+	                      </div>
+	                      <div class="field">
+	                        <label for="loginSubmitSelector" class="label-title">Submit selector (optional)</label>
+	                        <input id="loginSubmitSelector" class="mono" type="text" placeholder="button[type='submit']" />
+	                      </div>
+	                      <div class="field">
+	                        <label for="loginSuccessSelector" class="label-title">Success selector (optional)</label>
+	                        <input id="loginSuccessSelector" class="mono" type="text" placeholder=".account-home" />
+	                      </div>
+	                    </div>
+	                  </div>
+	                </div>
+	              </details>
+
+	              <details class="expand">
+	                <summary>Failure artifacts</summary>
+	                <div class="expand-content">
+	                  <div class="pane" id="artifactPanel">
+	                    <div id="artifactFields" class="hidden">
+	                      <div class="checkbox-grid" style="margin-bottom: 10px;">
+	                        <label class="checkbox"><input id="artifactSaveHtml" type="checkbox" checked />Save raw HTML</label>
+	                        <label class="checkbox"><input id="artifactSaveScreenshot" type="checkbox" checked />Save screenshot</label>
+	                      </div>
+	                      <div class="field">
+	                        <label for="artifactOutputDir" class="label-title">Output directory (optional)</label>
+	                        <input id="artifactOutputDir" type="text" placeholder="Defaults to Documents/Website Element Scraper/failure-artifacts" />
+	                      </div>
+	                    </div>
+	                    <div class="actions" style="margin-top: 10px;">
+	                      <button class="ghost" id="openArtifactDir" disabled>Open last artifact folder</button>
+	                    </div>
+	                  </div>
+	                </div>
+	              </details>
+	            </div>
+	          </section>
+	        </div>
+	      </section>
+
+	      <section class="tab-panel" id="panelResults" role="tabpanel" aria-labelledby="tabResults">
+	        <div class="stack">
+	          <section class="card">
+	            <div class="card-head">
+	              <div>
+	                <p class="card-title">Results</p>
+	                <p class="card-sub">Includes status, final URL, retries, errors, redirects, and artifact folder.</p>
+	              </div>
+	              <div class="actions">
+	                <button class="secondary" id="copyCsv" disabled>Copy table</button>
+	                <button class="secondary" id="downloadCsv" disabled>Download CSV</button>
+	              </div>
+	            </div>
+	            <div class="card-body" style="padding-top: 10px;">
+	              <div class="table-wrap">
+	                <table id="results"></table>
+	              </div>
+	            </div>
+	          </section>
+
+	          <section class="card">
+	            <div class="card-head">
+	              <div>
+	                <p class="card-title">Run log and progress</p>
+	                <p class="card-sub">Shows what the scraper is doing and how far it’s progressed.</p>
+	              </div>
+	            </div>
+	            <div class="card-body">
+	              <details class="expand" id="runLogDetails" open>
+	                <summary>Run log and progress</summary>
+	                <div class="expand-content">
+	                  <div class="run-state-card" id="runStateCard">
+	                    <div class="run-state-top">
+	                      <div id="runStateBadge" class="run-state-badge idle">Idle</div>
+	                      <div id="runSummaryText" class="run-summary-text">Ready to run.</div>
+	                    </div>
+	                    <div class="progress-track" aria-hidden="true">
+	                      <div id="progressFill" class="progress-fill"></div>
+	                    </div>
+	                    <div class="run-stats">
+	                      <div class="stat"><span>Done</span><strong id="doneCount">0</strong></div>
+	                      <div class="stat"><span>Success</span><strong id="successCount">0</strong></div>
+	                      <div class="stat"><span>Failed</span><strong id="failedCount">0</strong></div>
+	                      <div class="stat"><span>ETA</span><strong id="etaText">--</strong></div>
+	                    </div>
+	                  </div>
+	                  <div class="status" id="status"></div>
+	                  <div class="status-bar">
+	                    <div id="progressText">0 / 0</div>
+	                    <div id="pickerState" class="pill">Picker idle</div>
+	                  </div>
+	                </div>
+	              </details>
+	            </div>
+	          </section>
+	        </div>
+	      </section>
+	    </main>
+	  </div>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script>
@@ -604,34 +1824,124 @@
       { label: "h1", selector: "h1", mode: "text", attr: "" },
       { label: "meta_description", selector: "meta[name=\"description\"]", mode: "attr", attr: "content" },
       { label: "canonical_url", selector: "link[rel=\"canonical\"]", mode: "attr", attr: "href" },
-      { label: "robots", selector: "meta[name=\"robots\"]", mode: "attr", attr: "content" },
-      { label: "og_title", selector: "meta[property=\"og:title\"], meta[name=\"og:title\"]", mode: "attr", attr: "content" },
-      { label: "og_description", selector: "meta[property=\"og:description\"], meta[name=\"og:description\"]", mode: "attr", attr: "content" },
-      { label: "og_type", selector: "meta[property=\"og:type\"], meta[name=\"og:type\"]", mode: "attr", attr: "content" },
-      { label: "og_image", selector: "meta[property=\"og:image\"], meta[name=\"og:image\"]", mode: "attr", attr: "content" },
+      { label: "date", selector: ".learn-post__info-item:last-child > span:last-child, .info__row:last-child > span:last-child", mode: "text", attr: "" },
+      { label: "reviewer_name", selector: ".reviewer-tooltip__trigger, .info__row:nth-child(2) a", mode: "text", attr: "" },
+      { label: "reviewer_url", selector: ".reviewer-tooltip__trigger, .info__row:nth-child(2) a", mode: "attr", attr: "href" },
+      { label: "author_name", selector: ".post-author__name a", mode: "text", attr: "" },
+      { label: "author_url", selector: ".post-author__name a", mode: "attr", attr: "href" },
+      { label: "widget", selector: ".editor__widget *:not(iframe)", mode: "text", attr: "" },
+      { label: "widget_iframe_url", selector: ".editor__widget iframe", mode: "attr", attr: "src" },
+      { label: "cta_banner", selector: ".cta-banner__text", mode: "text", attr: "" },
+      { label: "cta_banner_cta_url", selector: ".cta-banner__cta a.btn:last-child", mode: "attr", attr: "href" },
+      { label: "sticky_promo", selector: ".promo-banner__inner", mode: "text", attr: "" },
+      { label: "sticky_promo_cta_url", selector: ".promo-banner, .promo-banner a", mode: "attr", attr: "href" },
+      { label: "h2", selector: "h2", mode: "text", attr: "" },
       { label: "hreflang", selector: "link[rel=\"alternate\"][hreflang]", mode: "hreflang", attr: "" },
+      { label: "robots", selector: "meta[name=\"robots\"]", mode: "attr", attr: "content" },
       { label: "jsonld", selector: "script[type=\"application/ld+json\"]", mode: "jsonld", attr: "" }
     ];
+
+    const metadataHeaders = [
+      "_status",
+      "_final_url",
+      "_error_code",
+      "_error",
+      "_attempts",
+      "_redirect_chain",
+      "_artifact_dir"
+    ];
+
+    const defaults = {
+      frequency: 0,
+      concurrency: 3,
+      perDomainDelay: 0,
+      maxRequests: 0,
+      requestTimeout: 30,
+      waitTimeout: 0,
+      retryCount: 2,
+      retryBackoff: 700,
+      domainChallengeThreshold: 2,
+      directHardenRetries: 1,
+      proxyAttemptsPerUrl: 2,
+      challengeStatusCodes: "403,429,503",
+      challengeSignals: "cloudflare,captcha,verify you are human,access denied,cf-chl",
+      botGuardEnabled: true,
+      proxyFallbackEnabled: false,
+      proxyStickyPerDomain: true,
+      proxyRotateOnFailure: true,
+      artifactsEnabled: false,
+      artifactSaveHtml: true,
+      artifactSaveScreenshot: true,
+      loginWaitSeconds: 2
+    };
+
+    const presetStorageKey = "scraperPresetsV2";
+    const sessionStorageKey = "scraperSessionV2";
 
     const urlsEl = document.getElementById("urls");
     const headlessEl = document.getElementById("headless");
     const renderJsEl = document.getElementById("renderJs");
     const blockResourcesEl = document.getElementById("blockResources");
+    const waitSelectorField = document.getElementById("waitSelectorField");
     const waitSelectorEl = document.getElementById("waitSelector");
     const waitTimeoutEl = document.getElementById("waitTimeout");
-    const waitSelectorField = document.getElementById("waitSelectorField");
-    const waitTimeoutField = document.getElementById("waitTimeoutField");
+
+    const concurrencyEl = document.getElementById("concurrency");
     const frequencyEl = document.getElementById("frequency");
-    const targetsEl = document.getElementById("targets");
+    const perDomainDelayEl = document.getElementById("perDomainDelay");
+    const maxRequestsEl = document.getElementById("maxRequests");
+    const requestTimeoutEl = document.getElementById("requestTimeout");
+    const retryCountEl = document.getElementById("retryCount");
+    const retryBackoffEl = document.getElementById("retryBackoff");
+    const botGuardEnabledEl = document.getElementById("botGuardEnabled");
+    const proxyFallbackEnabledEl = document.getElementById("proxyFallbackEnabled");
+    const botGuardFieldsEl = document.getElementById("botGuardFields");
+    const proxyFallbackFieldsEl = document.getElementById("proxyFallbackFields");
+    const domainChallengeThresholdEl = document.getElementById("domainChallengeThreshold");
+    const directHardenRetriesEl = document.getElementById("directHardenRetries");
+    const proxyAttemptsPerUrlEl = document.getElementById("proxyAttemptsPerUrl");
+    const challengeStatusCodesEl = document.getElementById("challengeStatusCodes");
+    const challengeSignalsEl = document.getElementById("challengeSignals");
+    const proxyStickyPerDomainEl = document.getElementById("proxyStickyPerDomain");
+    const proxyRotateOnFailureEl = document.getElementById("proxyRotateOnFailure");
+    const proxyListEl = document.getElementById("proxyList");
+    const proxyListSummaryEl = document.getElementById("proxyListSummary");
+
+    const authHeadersEl = document.getElementById("authHeaders");
+    const authCookiesEl = document.getElementById("authCookies");
+
+    const loginEnabledEl = document.getElementById("loginEnabled");
+    const loginFieldsEl = document.getElementById("loginFields");
+    const loginUrlEl = document.getElementById("loginUrl");
+    const loginUsernameEl = document.getElementById("loginUsername");
+    const loginPasswordEl = document.getElementById("loginPassword");
+    const loginUsernameSelectorEl = document.getElementById("loginUsernameSelector");
+    const loginPasswordSelectorEl = document.getElementById("loginPasswordSelector");
+    const loginSubmitSelectorEl = document.getElementById("loginSubmitSelector");
+    const loginSuccessSelectorEl = document.getElementById("loginSuccessSelector");
+    const loginWaitSecondsEl = document.getElementById("loginWaitSeconds");
+
+    const artifactsEnabledEl = document.getElementById("artifactsEnabled");
+    const artifactFieldsEl = document.getElementById("artifactFields");
+    const artifactSaveHtmlEl = document.getElementById("artifactSaveHtml");
+    const artifactSaveScreenshotEl = document.getElementById("artifactSaveScreenshot");
+    const artifactOutputDirEl = document.getElementById("artifactOutputDir");
+    const openArtifactDirBtn = document.getElementById("openArtifactDir");
+
     const scrapeBtn = document.getElementById("scrape");
     const stopScrapeBtn = document.getElementById("stopScrape");
-    const addTargetBtn = document.getElementById("addTarget");
     const clearBtn = document.getElementById("clear");
     const resetDefaultsBtn = document.getElementById("resetDefaults");
-    const statusEl = document.getElementById("status");
-    const resultsTable = document.getElementById("results");
-    const copyCsvBtn = document.getElementById("copyCsv");
-    const downloadCsvBtn = document.getElementById("downloadCsv");
+    const runProfileBtnEls = Array.from(document.querySelectorAll("[data-run-profile]"));
+
+    const pickerUrlEl = document.getElementById("pickerUrl");
+    const startPickerBtn = document.getElementById("startPicker");
+    const stopPickerBtn = document.getElementById("stopPicker");
+    const pickerStateEl = document.getElementById("pickerState");
+
+    const targetsEl = document.getElementById("targets");
+    const addTargetBtn = document.getElementById("addTarget");
+
     const presetSelect = document.getElementById("presetSelect");
     const presetNameInput = document.getElementById("presetName");
     const savePresetBtn = document.getElementById("savePreset");
@@ -639,27 +1949,469 @@
     const exportPresetBtn = document.getElementById("exportPreset");
     const importPresetBtn = document.getElementById("importPreset");
     const importPresetFile = document.getElementById("importPresetFile");
-    const toastEl = document.getElementById("toast");
+
+    const statusEl = document.getElementById("status");
     const progressTextEl = document.getElementById("progressText");
     const etaTextEl = document.getElementById("etaText");
+    const runLogDetailsEl = document.getElementById("runLogDetails");
+    const runStateCardEl = document.getElementById("runStateCard");
+    const runStateBadgeEl = document.getElementById("runStateBadge");
+    const runSummaryTextEl = document.getElementById("runSummaryText");
+    const progressFillEl = document.getElementById("progressFill");
+    const doneCountEl = document.getElementById("doneCount");
+    const successCountEl = document.getElementById("successCount");
+    const failedCountEl = document.getElementById("failedCount");
 
-    const defaultFrequency = 0;
-    const presetStorageKey = "scraperPresetsV1";
-    const sessionStorageKey = "scraperSessionV1";
+    const resultsTable = document.getElementById("results");
+    const copyCsvBtn = document.getElementById("copyCsv");
+    const downloadCsvBtn = document.getElementById("downloadCsv");
+
+    const toastEl = document.getElementById("toast");
+
+    const tabTargetEl = document.getElementById("tabTarget");
+    const tabSettingsEl = document.getElementById("tabSettings");
+    const tabResultsEl = document.getElementById("tabResults");
+    const panelTargetEl = document.getElementById("panelTarget");
+    const panelSettingsEl = document.getElementById("panelSettings");
+    const panelResultsEl = document.getElementById("panelResults");
+
+    let saveInputsTimer = null;
     let sessionState = null;
     let currentHeaders = [];
     let currentRows = [];
+    let activeTargetRow = null;
+    let pickerRunning = false;
+    let lastArtifactDir = "";
+    let runMetrics = { total: 0, done: 0, success: 0, failed: 0, state: "idle" };
+    let activeRunProfile = "balanced";
+
+    function getDefaultPresetSettings() {
+      return {
+        runProfile: "balanced",
+        headless: true,
+        renderJs: true,
+        blockResources: true,
+        waitSelector: "",
+        waitTimeout: defaults.waitTimeout,
+        concurrency: defaults.concurrency,
+        frequency: defaults.frequency,
+        perDomainDelay: defaults.perDomainDelay,
+        maxRequests: defaults.maxRequests,
+        requestTimeout: defaults.requestTimeout,
+        retryCount: defaults.retryCount,
+        retryBackoff: defaults.retryBackoff,
+        botGuardEnabled: defaults.botGuardEnabled,
+        proxyFallbackEnabled: defaults.proxyFallbackEnabled,
+        domainChallengeThreshold: defaults.domainChallengeThreshold,
+        directHardenRetries: defaults.directHardenRetries,
+        proxyAttemptsPerUrl: defaults.proxyAttemptsPerUrl,
+        challengeStatusCodes: defaults.challengeStatusCodes,
+        challengeSignals: defaults.challengeSignals,
+        proxyStickyPerDomain: defaults.proxyStickyPerDomain,
+        proxyRotateOnFailure: defaults.proxyRotateOnFailure,
+        proxyList: "",
+        artifactsEnabled: defaults.artifactsEnabled,
+        artifactSaveHtml: defaults.artifactSaveHtml,
+        artifactSaveScreenshot: defaults.artifactSaveScreenshot,
+        artifactOutputDir: "",
+        authHeaders: "",
+        authCookies: "",
+        loginEnabled: false,
+        loginUrl: "",
+        loginUsername: "",
+        loginPassword: "",
+        loginUsernameSelector: "",
+        loginPasswordSelector: "",
+        loginSubmitSelector: "",
+        loginSuccessSelector: "",
+        loginWaitSeconds: defaults.loginWaitSeconds
+      };
+    }
+
+    function getCurrentRunControlSettings() {
+      return {
+        runProfile: activeRunProfile,
+        headless: headlessEl.checked,
+        renderJs: renderJsEl.checked,
+        blockResources: blockResourcesEl.checked,
+        waitSelector: waitSelectorEl.value,
+        waitTimeout: clamp(waitTimeoutEl.value, defaults.waitTimeout, 0, 120),
+        concurrency: Math.round(clamp(concurrencyEl.value, defaults.concurrency, 1, 12)),
+        frequency: clamp(frequencyEl.value, defaults.frequency, 0, 60),
+        perDomainDelay: clamp(perDomainDelayEl.value, defaults.perDomainDelay, 0, 120),
+        maxRequests: Math.round(clamp(maxRequestsEl.value, defaults.maxRequests, 0, 50000)),
+        requestTimeout: clamp(requestTimeoutEl.value, defaults.requestTimeout, 2, 240),
+        retryCount: Math.round(clamp(retryCountEl.value, defaults.retryCount, 0, 8)),
+        retryBackoff: Math.round(clamp(retryBackoffEl.value, defaults.retryBackoff, 100, 20000)),
+        botGuardEnabled: botGuardEnabledEl.checked,
+        proxyFallbackEnabled: proxyFallbackEnabledEl.checked,
+        domainChallengeThreshold: Math.round(clamp(domainChallengeThresholdEl.value, defaults.domainChallengeThreshold, 1, 8)),
+        directHardenRetries: Math.round(clamp(directHardenRetriesEl.value, defaults.directHardenRetries, 0, 3)),
+        proxyAttemptsPerUrl: Math.round(clamp(proxyAttemptsPerUrlEl.value, defaults.proxyAttemptsPerUrl, 1, 8)),
+        challengeStatusCodes: challengeStatusCodesEl.value,
+        challengeSignals: challengeSignalsEl.value,
+        proxyStickyPerDomain: proxyStickyPerDomainEl.checked,
+        proxyRotateOnFailure: proxyRotateOnFailureEl.checked,
+        proxyList: proxyListEl.value,
+        artifactsEnabled: artifactsEnabledEl.checked,
+        artifactSaveHtml: artifactSaveHtmlEl.checked,
+        artifactSaveScreenshot: artifactSaveScreenshotEl.checked,
+        artifactOutputDir: artifactOutputDirEl.value,
+        authHeaders: authHeadersEl.value,
+        authCookies: authCookiesEl.value,
+        loginEnabled: loginEnabledEl.checked,
+        loginUrl: loginUrlEl.value,
+        loginUsername: loginUsernameEl.value,
+        loginPassword: loginPasswordEl.value,
+        loginUsernameSelector: loginUsernameSelectorEl.value,
+        loginPasswordSelector: loginPasswordSelectorEl.value,
+        loginSubmitSelector: loginSubmitSelectorEl.value,
+        loginSuccessSelector: loginSuccessSelectorEl.value,
+        loginWaitSeconds: clamp(loginWaitSecondsEl.value, defaults.loginWaitSeconds, 0, 30)
+      };
+    }
+
+    function applyPresetSettings(settings) {
+      const merged = { ...getDefaultPresetSettings(), ...(settings || {}) };
+      setActiveRunProfile(typeof merged.runProfile === "string" ? merged.runProfile : "custom");
+
+      if (typeof merged.headless === "boolean") headlessEl.checked = merged.headless;
+      if (typeof merged.renderJs === "boolean") renderJsEl.checked = merged.renderJs;
+      if (typeof merged.blockResources === "boolean") blockResourcesEl.checked = merged.blockResources;
+      if (typeof merged.waitSelector === "string") waitSelectorEl.value = merged.waitSelector;
+      if (typeof merged.waitTimeout === "number") waitTimeoutEl.value = merged.waitTimeout;
+      if (typeof merged.concurrency === "number") concurrencyEl.value = merged.concurrency;
+      if (typeof merged.frequency === "number") frequencyEl.value = merged.frequency;
+      if (typeof merged.perDomainDelay === "number") perDomainDelayEl.value = merged.perDomainDelay;
+      if (typeof merged.maxRequests === "number") maxRequestsEl.value = merged.maxRequests;
+      if (typeof merged.requestTimeout === "number") requestTimeoutEl.value = merged.requestTimeout;
+      if (typeof merged.retryCount === "number") retryCountEl.value = merged.retryCount;
+      if (typeof merged.retryBackoff === "number") retryBackoffEl.value = merged.retryBackoff;
+      if (typeof merged.botGuardEnabled === "boolean") botGuardEnabledEl.checked = merged.botGuardEnabled;
+      if (typeof merged.proxyFallbackEnabled === "boolean") proxyFallbackEnabledEl.checked = merged.proxyFallbackEnabled;
+      if (typeof merged.domainChallengeThreshold === "number") domainChallengeThresholdEl.value = merged.domainChallengeThreshold;
+      if (typeof merged.directHardenRetries === "number") directHardenRetriesEl.value = merged.directHardenRetries;
+      if (typeof merged.proxyAttemptsPerUrl === "number") proxyAttemptsPerUrlEl.value = merged.proxyAttemptsPerUrl;
+      if (typeof merged.challengeStatusCodes === "string") challengeStatusCodesEl.value = merged.challengeStatusCodes;
+      if (typeof merged.challengeSignals === "string") challengeSignalsEl.value = merged.challengeSignals;
+      if (typeof merged.proxyStickyPerDomain === "boolean") proxyStickyPerDomainEl.checked = merged.proxyStickyPerDomain;
+      if (typeof merged.proxyRotateOnFailure === "boolean") proxyRotateOnFailureEl.checked = merged.proxyRotateOnFailure;
+      if (typeof merged.proxyList === "string") proxyListEl.value = merged.proxyList;
+
+      if (typeof merged.artifactsEnabled === "boolean") artifactsEnabledEl.checked = merged.artifactsEnabled;
+      if (typeof merged.artifactSaveHtml === "boolean") artifactSaveHtmlEl.checked = merged.artifactSaveHtml;
+      if (typeof merged.artifactSaveScreenshot === "boolean") artifactSaveScreenshotEl.checked = merged.artifactSaveScreenshot;
+      if (typeof merged.artifactOutputDir === "string") artifactOutputDirEl.value = merged.artifactOutputDir;
+
+      if (typeof merged.authHeaders === "string") authHeadersEl.value = merged.authHeaders;
+      if (typeof merged.authCookies === "string") authCookiesEl.value = merged.authCookies;
+
+      if (typeof merged.loginEnabled === "boolean") loginEnabledEl.checked = merged.loginEnabled;
+      if (typeof merged.loginUrl === "string") loginUrlEl.value = merged.loginUrl;
+      if (typeof merged.loginUsername === "string") loginUsernameEl.value = merged.loginUsername;
+      if (typeof merged.loginPassword === "string") loginPasswordEl.value = merged.loginPassword;
+      if (typeof merged.loginUsernameSelector === "string") loginUsernameSelectorEl.value = merged.loginUsernameSelector;
+      if (typeof merged.loginPasswordSelector === "string") loginPasswordSelectorEl.value = merged.loginPasswordSelector;
+      if (typeof merged.loginSubmitSelector === "string") loginSubmitSelectorEl.value = merged.loginSubmitSelector;
+      if (typeof merged.loginSuccessSelector === "string") loginSuccessSelectorEl.value = merged.loginSuccessSelector;
+      if (typeof merged.loginWaitSeconds === "number") loginWaitSecondsEl.value = merged.loginWaitSeconds;
+
+      syncRenderModeUI();
+      syncLoginUI();
+      syncArtifactsUI();
+      syncProxyFallbackUI();
+    }
+
+    function clamp(value, fallback, min, max) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return fallback;
+      return Math.min(max, Math.max(min, n));
+    }
+
+    function setActiveRunProfile(profile) {
+      activeRunProfile = profile || "custom";
+      runProfileBtnEls.forEach((btn) => {
+        const isActive = btn.dataset.runProfile === activeRunProfile;
+        btn.classList.toggle("active", isActive);
+      });
+    }
+
+    function getRunProfileSettings(profile) {
+      const map = {
+        fast: {
+          headless: true,
+          renderJs: true,
+          blockResources: true,
+          concurrency: 6,
+          frequency: 0,
+          perDomainDelay: 0.2,
+          requestTimeout: 20,
+          waitTimeout: 0,
+          retryCount: 1,
+          retryBackoff: 500,
+          botGuardEnabled: true,
+          directHardenRetries: 0,
+          proxyFallbackEnabled: false,
+          artifactsEnabled: false
+        },
+        balanced: {
+          headless: true,
+          renderJs: true,
+          blockResources: true,
+          concurrency: defaults.concurrency,
+          frequency: defaults.frequency,
+          perDomainDelay: defaults.perDomainDelay,
+          requestTimeout: defaults.requestTimeout,
+          waitTimeout: defaults.waitTimeout,
+          retryCount: defaults.retryCount,
+          retryBackoff: defaults.retryBackoff,
+          botGuardEnabled: true,
+          directHardenRetries: defaults.directHardenRetries,
+          proxyFallbackEnabled: defaults.proxyFallbackEnabled,
+          artifactsEnabled: defaults.artifactsEnabled
+        },
+        stealth: {
+          headless: false,
+          renderJs: true,
+          blockResources: false,
+          concurrency: 1,
+          frequency: 1.2,
+          perDomainDelay: 2.2,
+          requestTimeout: 45,
+          waitTimeout: 2,
+          retryCount: 3,
+          retryBackoff: 1300,
+          botGuardEnabled: true,
+          directHardenRetries: 2,
+          proxyFallbackEnabled: false,
+          artifactsEnabled: true
+        },
+        recovery: {
+          headless: true,
+          renderJs: true,
+          blockResources: false,
+          concurrency: 2,
+          frequency: 0.8,
+          perDomainDelay: 1.4,
+          requestTimeout: 60,
+          waitTimeout: 2,
+          retryCount: 4,
+          retryBackoff: 1500,
+          botGuardEnabled: true,
+          directHardenRetries: 2,
+          proxyFallbackEnabled: true,
+          artifactsEnabled: true
+        }
+      };
+      return map[profile] || null;
+    }
+
+    function applyRunProfile(profile) {
+      const settings = getRunProfileSettings(profile);
+      if (!settings) return;
+      applyPresetSettings({
+        ...getCurrentRunControlSettings(),
+        ...settings,
+        runProfile: profile
+      });
+      setActiveRunProfile(profile);
+      scheduleSaveInputs();
+      showToast(`Profile: ${profile}`);
+    }
+
+    function getNormalizedUrls() {
+      return urlsEl.value
+        .split(/\r?\n/)
+        .map((value) => value.trim())
+        .filter(Boolean);
+    }
+
+    function getEffectiveUrls() {
+      const urls = getNormalizedUrls();
+      const max = Math.round(clamp(maxRequestsEl.value, defaults.maxRequests, 0, 50000));
+      if (max > 0 && max < urls.length) {
+        return urls.slice(0, max);
+      }
+      return urls;
+    }
+
+    function setActiveTab(tab) {
+      const key = tab === "settings" || tab === "results" ? tab : "target";
+      const buttons = [
+        { key: "target", el: tabTargetEl, panel: panelTargetEl },
+        { key: "settings", el: tabSettingsEl, panel: panelSettingsEl },
+        { key: "results", el: tabResultsEl, panel: panelResultsEl }
+      ];
+      buttons.forEach(({ key: k, el, panel }) => {
+        if (!el || !panel) return;
+        const active = k === key;
+        el.classList.toggle("active", active);
+        el.setAttribute("aria-selected", active ? "true" : "false");
+        panel.classList.toggle("active", active);
+      });
+    }
 
     function syncRenderModeUI() {
       const enabled = !!renderJsEl.checked;
-      waitSelectorField.style.display = enabled ? "" : "none";
-      waitTimeoutField.style.display = enabled ? "" : "none";
+      waitSelectorField.classList.toggle("hidden", !enabled);
+      blockResourcesEl.disabled = !enabled;
+      waitTimeoutEl.disabled = !enabled;
+      headlessEl.disabled = !enabled;
+      if (!enabled) {
+        waitSelectorEl.value = "";
+      }
     }
-    renderJsEl.addEventListener("change", () => {
-      syncRenderModeUI();
-      scheduleSaveInputs();
-    });
-    syncRenderModeUI();
+
+    function syncLoginUI() {
+      const enabled = !!loginEnabledEl.checked;
+      loginFieldsEl.classList.toggle("hidden", !enabled);
+      loginFieldsEl.classList.toggle("is-disabled", !enabled);
+      [
+        loginUrlEl,
+        loginUsernameEl,
+        loginPasswordEl,
+        loginUsernameSelectorEl,
+        loginPasswordSelectorEl,
+        loginSubmitSelectorEl,
+        loginSuccessSelectorEl,
+        loginWaitSecondsEl
+      ].forEach((el) => {
+        el.disabled = !enabled;
+      });
+    }
+
+    function syncArtifactsUI() {
+      const enabled = !!artifactsEnabledEl.checked;
+      artifactFieldsEl.classList.toggle("hidden", !enabled);
+      artifactFieldsEl.classList.toggle("is-disabled", !enabled);
+      [artifactSaveHtmlEl, artifactSaveScreenshotEl, artifactOutputDirEl].forEach((el) => {
+        el.disabled = !enabled;
+      });
+      const configuredDir = artifactOutputDirEl.value.trim();
+      openArtifactDirBtn.disabled = !(lastArtifactDir || configuredDir);
+    }
+
+    function setGroupDisabled(groupEl, disabled) {
+      if (!groupEl) return;
+      groupEl.classList.toggle("is-disabled", !!disabled);
+      Array.from(groupEl.querySelectorAll("input, textarea, select, button")).forEach((el) => {
+        if (el.id === "proxyListSummary") return;
+        el.disabled = !!disabled;
+      });
+    }
+
+    function syncBotGuardUI() {
+      const enabled = !!botGuardEnabledEl.checked;
+      setGroupDisabled(botGuardFieldsEl, !enabled);
+      // If bot-guard is off, proxy fallback cannot trigger reliably.
+      if (!enabled && proxyFallbackEnabledEl.checked) {
+        proxyFallbackEnabledEl.checked = false;
+        showToast("Proxy fallback disabled (bot-guard off)");
+      }
+      proxyFallbackEnabledEl.disabled = !enabled;
+    }
+
+    function syncProxyFallbackUI() {
+      syncBotGuardUI();
+      const enabled = !!proxyFallbackEnabledEl.checked;
+      setGroupDisabled(proxyFallbackFieldsEl, !enabled);
+      if (proxyListSummaryEl) {
+        const count = (proxyListEl.value || "")
+          .split(/\r?\n/)
+          .map((v) => v.trim())
+          .filter((v) => v && !v.startsWith("#")).length;
+        proxyListSummaryEl.value = count ? `${count} proxy endpoint${count === 1 ? "" : "s"} configured` : "0 proxies configured";
+      }
+    }
+
+    function setPickerState(active) {
+      pickerRunning = !!active;
+      startPickerBtn.disabled = pickerRunning;
+      stopPickerBtn.disabled = !pickerRunning;
+      pickerStateEl.classList.toggle("active", pickerRunning);
+      pickerStateEl.textContent = pickerRunning ? "Picker active" : "Picker idle";
+    }
+
+    function log(message) {
+      statusEl.textContent += message + "\n";
+      statusEl.scrollTop = statusEl.scrollHeight;
+    }
+
+    function clearLog() {
+      statusEl.textContent = "";
+      progressTextEl.textContent = "0 / 0";
+      etaTextEl.textContent = "--";
+    }
+
+    function setRunState(state, summary) {
+      const valid = ["idle", "running", "completed", "stopped", "failed"];
+      const next = valid.includes(state) ? state : "idle";
+      runMetrics.state = next;
+      runStateBadgeEl.className = `run-state-badge ${next}`;
+      runStateBadgeEl.textContent = next === "idle"
+        ? "Idle"
+        : next.charAt(0).toUpperCase() + next.slice(1);
+      runSummaryTextEl.textContent = summary || "";
+      runStateCardEl.dataset.state = next;
+    }
+
+    function updateRunCounters() {
+      doneCountEl.textContent = String(runMetrics.done || 0);
+      successCountEl.textContent = String(runMetrics.success || 0);
+      failedCountEl.textContent = String(runMetrics.failed || 0);
+    }
+
+    function resetRunMetrics(total = 0) {
+      runMetrics = { total, done: 0, success: 0, failed: 0, state: "idle" };
+      updateRunCounters();
+      progressFillEl.style.width = "0%";
+      progressTextEl.textContent = `0 / ${total || 0}`;
+      etaTextEl.textContent = "--";
+    }
+
+    let toastTimer = null;
+    function showToast(message) {
+      if (!toastEl) return;
+      toastEl.textContent = message;
+      toastEl.classList.add("show");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toastEl.classList.remove("show");
+      }, 1600);
+    }
+
+    function setButtonsEnabled(enabled) {
+      copyCsvBtn.disabled = !enabled;
+      downloadCsvBtn.disabled = !enabled;
+    }
+
+    function updateProgressUI(completed, total, remainingMs) {
+      progressTextEl.textContent = `${completed} / ${total}`;
+      runMetrics.total = total;
+      runMetrics.done = completed;
+      const pct = total > 0 ? Math.max(0, Math.min(100, (completed / total) * 100)) : 0;
+      progressFillEl.style.width = `${pct.toFixed(1)}%`;
+      updateRunCounters();
+      if (Number.isFinite(remainingMs)) {
+        const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+        const mins = Math.floor(totalSeconds / 60);
+        const secs = totalSeconds % 60;
+        etaTextEl.textContent = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+      } else {
+        etaTextEl.textContent = "--";
+      }
+    }
+
+    function setActiveTargetRow(row) {
+      if (activeTargetRow === row) return;
+      if (activeTargetRow) {
+        activeTargetRow.classList.remove("is-active");
+      }
+      activeTargetRow = row || null;
+      if (activeTargetRow) {
+        activeTargetRow.classList.add("is-active");
+      }
+    }
 
     function createTargetRow(data = {}) {
       const row = document.createElement("div");
@@ -688,11 +2440,12 @@
       label.value = data.label || "";
 
       const selector = document.createElement("input");
-      selector.className = "target-selector";
+      selector.className = "target-selector mono";
       selector.placeholder = "CSS selector";
       selector.value = data.selector || "";
 
       const mode = document.createElement("select");
+      mode.className = "target-mode";
       mode.innerHTML = [
         "<option value=\"text\">text</option>",
         "<option value=\"textAll\">textAll</option>",
@@ -709,10 +2462,30 @@
       mode.value = data.mode || "text";
 
       const attr = document.createElement("input");
-      attr.className = "target-attr";
+      attr.className = "target-attr mono";
       attr.placeholder = "attr name";
       attr.value = data.attr || "";
-      attr.disabled = !(mode.value === "attr" || mode.value === "attrAll");
+
+      const pick = document.createElement("button");
+      pick.type = "button";
+      pick.className = "pick";
+      pick.textContent = "Pick";
+      pick.addEventListener("click", async () => {
+        setActiveTargetRow(row);
+        await startPicker();
+      });
+
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "remove";
+      remove.textContent = "×";
+      remove.addEventListener("click", () => {
+        if (activeTargetRow === row) {
+          setActiveTargetRow(null);
+        }
+        row.remove();
+        scheduleSaveInputs();
+      });
 
       const updateModeUI = () => {
         const isAttr = mode.value === "attr" || mode.value === "attrAll";
@@ -730,6 +2503,11 @@
         attr.title = attr.value || attr.placeholder;
       };
 
+      [label, selector, mode, attr].forEach((el) => {
+        el.addEventListener("focus", () => setActiveTargetRow(row));
+        el.addEventListener("click", () => setActiveTargetRow(row));
+      });
+
       mode.addEventListener("change", () => {
         updateModeUI();
         scheduleSaveInputs();
@@ -746,15 +2524,9 @@
         updateTitles();
         scheduleSaveInputs();
       });
-      updateModeUI();
-      updateTitles();
 
-      const remove = document.createElement("button");
-      remove.className = "remove";
-      remove.textContent = "×";
-      remove.addEventListener("click", () => {
-        row.remove();
-        scheduleSaveInputs();
+      row.addEventListener("click", () => {
+        setActiveTargetRow(row);
       });
 
       row.addEventListener("dragstart", (event) => {
@@ -773,7 +2545,10 @@
         scheduleSaveInputs();
       });
 
-      row.append(dragHandle, label, selector, mode, attr, remove);
+      updateModeUI();
+      updateTitles();
+
+      row.append(dragHandle, label, selector, mode, attr, pick, remove);
       targetsEl.appendChild(row);
     }
 
@@ -795,7 +2570,7 @@
       const dragging = targetsEl.querySelector(".row.dragging");
       if (!dragging) return;
       const afterElement = getDragAfterElement(targetsEl, event.clientY);
-      if (afterElement == null) {
+      if (!afterElement) {
         targetsEl.appendChild(dragging);
       } else {
         targetsEl.insertBefore(dragging, afterElement);
@@ -808,27 +2583,33 @@
 
     function getTargetsRaw() {
       return Array.from(targetsEl.querySelectorAll(".row")).map((row) => {
-        const [label, selector, mode, attr] = row.querySelectorAll("input, select");
+        const label = row.querySelector(".target-label");
+        const selector = row.querySelector(".target-selector");
+        const mode = row.querySelector(".target-mode");
+        const attr = row.querySelector(".target-attr");
         return {
-          label: label.value.trim() || "Untitled",
-          selector: selector.value.trim(),
-          mode: mode.value,
-          attr: attr.value.trim()
+          label: (label?.value || "").trim() || "Untitled",
+          selector: (selector?.value || "").trim(),
+          mode: mode?.value || "text",
+          attr: (attr?.value || "").trim()
         };
       });
     }
 
     function getTargets() {
-      return getTargetsRaw().filter(t => t.selector || t.mode === "slug");
+      return getTargetsRaw().filter((t) => t.selector || t.mode === "slug");
     }
 
     function clearTargets() {
       targetsEl.innerHTML = "";
+      setActiveTargetRow(null);
     }
 
     function applyTargets(targets) {
       clearTargets();
-      targets.forEach(t => createTargetRow(t));
+      targets.forEach((target) => createTargetRow(target));
+      const first = targetsEl.querySelector(".row");
+      if (first) setActiveTargetRow(first);
     }
 
     function readPresetStore() {
@@ -845,120 +2626,102 @@
       localStorage.setItem(presetStorageKey, JSON.stringify(store));
     }
 
+    function normalizePresetEntry(entry) {
+      const source = Array.isArray(entry) ? { targets: entry } : (entry || {});
+      const targets = Array.isArray(source.targets)
+        ? source.targets.map((target) => ({
+            label: (target?.label || "Untitled").toString(),
+            selector: (target?.selector || "").toString(),
+            mode: (target?.mode || "text").toString(),
+            attr: (target?.attr || "").toString()
+          }))
+        : [];
+
+      const legacySettings = {
+        frequency: typeof source.frequency === "number" ? source.frequency : undefined,
+        concurrency: typeof source.concurrency === "number" ? source.concurrency : undefined
+      };
+      const hasStructuredSettings = !!(source.settings && typeof source.settings === "object");
+      const mergedSettings = {
+        ...getDefaultPresetSettings(),
+        ...legacySettings,
+        ...(hasStructuredSettings ? source.settings : {})
+      };
+      if (!hasStructuredSettings) {
+        mergedSettings.runProfile = "custom";
+      }
+
+      return {
+        targets,
+        settings: mergedSettings,
+        frequency: typeof mergedSettings.frequency === "number" ? mergedSettings.frequency : defaults.frequency,
+        concurrency: typeof mergedSettings.concurrency === "number" ? mergedSettings.concurrency : defaults.concurrency
+      };
+    }
+
     function ensurePresetStore() {
+      const defaultPreset = {
+        targets: defaultTargets.map((target) => ({ ...target })),
+        settings: getDefaultPresetSettings(),
+        frequency: defaults.frequency,
+        concurrency: defaults.concurrency
+      };
       const existing = readPresetStore();
-      if (existing && existing.presets) return existing;
+      if (existing && existing.presets && typeof existing.presets === "object") {
+        const migrated = {
+          last: typeof existing.last === "string" ? existing.last : "Default",
+          presets: {}
+        };
+
+        Object.entries(existing.presets).forEach(([name, preset]) => {
+          if (!name) return;
+          migrated.presets[name] = normalizePresetEntry(preset);
+        });
+
+        migrated.presets.Default = defaultPreset;
+        if (!migrated.presets[migrated.last]) {
+          migrated.last = "Default";
+        }
+
+        writePresetStore(migrated);
+        return migrated;
+      }
+
       const store = {
         last: "Default",
         presets: {
-          "Default": defaultTargets
+          "Default": defaultPreset
         }
       };
       writePresetStore(store);
       return store;
     }
 
-    function readSessionState() {
-      if (sessionState) return sessionState;
-      try {
-        const raw = localStorage.getItem(sessionStorageKey);
-        sessionState = raw ? JSON.parse(raw) : null;
-      } catch {
-        sessionState = null;
-      }
-      return sessionState;
-    }
-
-    function writeSessionState(next) {
-      sessionState = next;
-      localStorage.setItem(sessionStorageKey, JSON.stringify(next));
-    }
-
-    function updateSessionState(patch) {
-      const current = readSessionState() || { version: 1 };
-      const next = { ...current, ...patch };
-      writeSessionState(next);
-      return next;
-    }
-
-    function clearSessionState() {
-      sessionState = null;
-      localStorage.removeItem(sessionStorageKey);
-    }
-
-    function captureInputsState() {
-      return {
-        urls: urlsEl.value,
-        headless: headlessEl.checked,
-        renderJs: renderJsEl.checked,
-        blockResources: blockResourcesEl.checked,
-        waitSelector: waitSelectorEl.value,
-        waitTimeout: Number.isFinite(Number(waitTimeoutEl.value)) ? Number(waitTimeoutEl.value) : 15,
-        frequency: Number(frequencyEl.value || defaultFrequency),
-        targets: getTargetsRaw(),
-        preset: presetSelect.value || "Default"
-      };
-    }
-
-    function applyInputsState(inputs) {
-      if (!inputs) return;
-      if (typeof inputs.urls === "string") urlsEl.value = inputs.urls;
-      if (typeof inputs.headless === "boolean") headlessEl.checked = inputs.headless;
-      if (typeof inputs.renderJs === "boolean") renderJsEl.checked = inputs.renderJs;
-      if (typeof inputs.blockResources === "boolean") blockResourcesEl.checked = inputs.blockResources;
-      if (typeof inputs.waitSelector === "string") waitSelectorEl.value = inputs.waitSelector;
-      if (typeof inputs.waitTimeout === "number") waitTimeoutEl.value = inputs.waitTimeout;
-      if (typeof inputs.frequency === "number") frequencyEl.value = inputs.frequency;
-      if (Array.isArray(inputs.targets) && inputs.targets.length) {
-        applyTargets(inputs.targets);
-      } else if (inputs.preset) {
-        presetSelect.value = inputs.preset;
-        loadPreset(inputs.preset);
-      }
-      if (inputs.preset) presetSelect.value = inputs.preset;
-      syncRenderModeUI();
-    }
-
-    let saveInputsTimer = null;
-    function saveInputsState() {
-      updateSessionState({ inputs: captureInputsState() });
-    }
-
-    function scheduleSaveInputs() {
-      if (saveInputsTimer) clearTimeout(saveInputsTimer);
-      saveInputsTimer = setTimeout(saveInputsState, 250);
-    }
-
-    function buildRunSignature({ urls, targets, options }) {
-      return JSON.stringify({ urls, targets, options });
-    }
-
-    function saveResultsState(headers, rows, resume) {
-      updateSessionState({
-        results: { headers, rows },
-        resume
-      });
-    }
-
     function renderPresetOptions(store, selected) {
       presetSelect.innerHTML = "";
-      Object.keys(store.presets).sort().forEach((name) => {
-        const option = document.createElement("option");
-        option.value = name;
-        option.textContent = name;
-        if (name === selected) option.selected = true;
-        presetSelect.appendChild(option);
-      });
+      Object.keys(store.presets)
+        .sort((a, b) => a.localeCompare(b))
+        .forEach((name) => {
+          const option = document.createElement("option");
+          option.value = name;
+          option.textContent = name;
+          if (name === selected) option.selected = true;
+          presetSelect.appendChild(option);
+        });
     }
 
     function loadPreset(name) {
       const store = ensurePresetStore();
       const preset = store.presets[name];
       if (!preset) return;
-      applyTargets(preset.targets || preset);
-      if (preset.frequency) {
-        frequencyEl.value = preset.frequency;
-      }
+
+      const targetRows = Array.isArray(preset.targets) ? preset.targets : preset;
+      applyTargets(targetRows);
+      applyPresetSettings(preset.settings || {
+        frequency: preset.frequency,
+        concurrency: preset.concurrency
+      });
+
       store.last = name;
       writePresetStore(store);
       renderPresetOptions(store, name);
@@ -966,12 +2729,14 @@
     }
 
     function savePreset(name) {
-      const trimmed = name.trim();
+      const trimmed = (name || "").trim();
       if (!trimmed) return;
       const store = ensurePresetStore();
       store.presets[trimmed] = {
         targets: getTargets(),
-        frequency: Number(frequencyEl.value || defaultFrequency)
+        settings: getCurrentRunControlSettings(),
+        frequency: clamp(frequencyEl.value, defaults.frequency, 0, 60),
+        concurrency: Math.round(clamp(concurrencyEl.value, defaults.concurrency, 1, 12))
       };
       store.last = trimmed;
       writePresetStore(store);
@@ -1013,16 +2778,25 @@
             throw new Error("Invalid preset file.");
           }
           const store = ensurePresetStore();
-          const importName = prompt("Preset name for import:", parsed.last || "Imported Preset");
-          if (!importName) return;
+          const preferredName = (presetNameInput.value || parsed.last || "Imported Preset").trim();
+          const baseName = preferredName || "Imported Preset";
+          let importName = baseName;
+          let suffix = 2;
+          while (store.presets[importName]) {
+            importName = `${baseName} ${suffix}`;
+            suffix += 1;
+          }
           const importedPreset = parsed.last && parsed.presets[parsed.last]
             ? parsed.presets[parsed.last]
             : Object.values(parsed.presets)[0];
-          store.presets[importName] = importedPreset;
+          store.presets[importName] = normalizePresetEntry(importedPreset);
           store.last = importName;
           writePresetStore(store);
           renderPresetOptions(store, store.last);
           loadPreset(store.last);
+          presetNameInput.value = "";
+          showToast("Preset imported");
+          log(`Preset imported as "${importName}".`);
         } catch (err) {
           log(`Preset import failed: ${err.message || err}`);
         }
@@ -1030,39 +2804,317 @@
       reader.readAsText(file);
     }
 
-    function log(message) {
-      statusEl.textContent += message + "\n";
-      statusEl.scrollTop = statusEl.scrollHeight;
+    function readSessionState() {
+      if (sessionState) return sessionState;
+      try {
+        const raw = localStorage.getItem(sessionStorageKey);
+        sessionState = raw ? JSON.parse(raw) : null;
+      } catch {
+        sessionState = null;
+      }
+      return sessionState;
     }
 
-    function clearLog() {
-      statusEl.textContent = "";
-      progressTextEl.textContent = "0 / 0";
-      etaTextEl.textContent = "ETA: --";
+    function writeSessionState(next) {
+      sessionState = next;
+      localStorage.setItem(sessionStorageKey, JSON.stringify(next));
     }
 
-    let toastTimer = null;
-    function showToast(message) {
-      if (!toastEl) return;
-      toastEl.textContent = message;
-      toastEl.classList.add("show");
-      if (toastTimer) clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        toastEl.classList.remove("show");
-      }, 1600);
+    function updateSessionState(patch) {
+      const current = readSessionState() || { version: 2 };
+      const next = { ...current, ...patch };
+      writeSessionState(next);
+      return next;
+    }
+
+    function clearSessionState() {
+      sessionState = null;
+      localStorage.removeItem(sessionStorageKey);
+    }
+
+    function parseHeadersText(rawText) {
+      const text = (rawText || "").trim();
+      if (!text) return {};
+      if (text.startsWith("{")) {
+        const parsed = JSON.parse(text);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+          throw new Error("Headers JSON must be an object.");
+        }
+        const out = {};
+        Object.entries(parsed).forEach(([k, v]) => {
+          if (!k) return;
+          out[String(k).trim()] = String(v ?? "");
+        });
+        return out;
+      }
+
+      const out = {};
+      text.split(/\r?\n/).forEach((line, idx) => {
+        const value = line.trim();
+        if (!value || value.startsWith("#")) return;
+        const sep = value.indexOf(":");
+        if (sep <= 0) {
+          throw new Error(`Invalid header at line ${idx + 1}. Use \"Key: Value\".`);
+        }
+        const key = value.slice(0, sep).trim();
+        const headerValue = value.slice(sep + 1).trim();
+        if (!key) {
+          throw new Error(`Invalid header key at line ${idx + 1}.`);
+        }
+        out[key] = headerValue;
+      });
+      return out;
+    }
+
+    function parseCookieLine(line, lineNumber) {
+      const segments = line
+        .split(";")
+        .map((entry) => entry.trim())
+        .filter(Boolean);
+
+      if (!segments.length) return null;
+      const first = segments[0];
+      const eqIdx = first.indexOf("=");
+      if (eqIdx <= 0) {
+        throw new Error(`Invalid cookie at line ${lineNumber}: missing name=value.`);
+      }
+
+      const cookie = {
+        name: first.slice(0, eqIdx).trim(),
+        value: first.slice(eqIdx + 1).trim(),
+        path: "/"
+      };
+
+      segments.slice(1).forEach((segment) => {
+        const [rawKey, ...rest] = segment.split("=");
+        const key = (rawKey || "").trim().toLowerCase();
+        const value = rest.join("=").trim();
+        if (!key) return;
+        if (key === "domain") cookie.domain = value;
+        else if (key === "path") cookie.path = value || "/";
+        else if (key === "url") cookie.url = value;
+        else if (key === "secure") cookie.secure = true;
+        else if (key === "httponly" || key === "http_only") cookie.httpOnly = true;
+        else if (key === "samesite") cookie.sameSite = value || "Lax";
+        else if (key === "max-age") {
+          const secs = Number(value);
+          if (Number.isFinite(secs)) {
+            cookie.expires = Math.floor(Date.now() / 1000) + Math.max(0, secs);
+          }
+        } else if (key === "expires") {
+          const ts = Date.parse(value);
+          if (Number.isFinite(ts)) {
+            cookie.expires = Math.floor(ts / 1000);
+          }
+        }
+      });
+
+      if (!cookie.name) {
+        throw new Error(`Invalid cookie at line ${lineNumber}: empty name.`);
+      }
+      return cookie;
+    }
+
+    function parseCookiesText(rawText) {
+      const text = (rawText || "").trim();
+      if (!text) return [];
+
+      if (text.startsWith("[")) {
+        const parsed = JSON.parse(text);
+        if (!Array.isArray(parsed)) {
+          throw new Error("Cookies JSON must be an array.");
+        }
+        return parsed;
+      }
+
+      const cookies = [];
+      text.split(/\r?\n/).forEach((line, idx) => {
+        const value = line.trim();
+        if (!value || value.startsWith("#")) return;
+        const parsed = parseCookieLine(value, idx + 1);
+        if (parsed) cookies.push(parsed);
+      });
+      return cookies;
+    }
+
+    function buildLoginConfig() {
+      if (!loginEnabledEl.checked) return { enabled: false };
+      const loginUrl = loginUrlEl.value.trim();
+      const usernameSelector = loginUsernameSelectorEl.value.trim();
+      const passwordSelector = loginPasswordSelectorEl.value.trim();
+
+      if (!loginUrl || !usernameSelector || !passwordSelector) {
+        throw new Error("Login pre-step requires URL, username selector, and password selector.");
+      }
+
+      return {
+        enabled: true,
+        url: loginUrl,
+        username: loginUsernameEl.value,
+        password: loginPasswordEl.value,
+        usernameSelector,
+        passwordSelector,
+        submitSelector: loginSubmitSelectorEl.value.trim(),
+        successSelector: loginSuccessSelectorEl.value.trim(),
+        waitSeconds: clamp(loginWaitSecondsEl.value, defaults.loginWaitSeconds, 0, 30)
+      };
+    }
+
+    function buildAuthPayload() {
+      const headers = parseHeadersText(authHeadersEl.value);
+      const cookies = parseCookiesText(authCookiesEl.value);
+      const login = buildLoginConfig();
+      return { headers, cookies, login };
+    }
+
+    function captureInputsState() {
+      return {
+        urls: urlsEl.value,
+        runProfile: activeRunProfile,
+        headless: headlessEl.checked,
+        renderJs: renderJsEl.checked,
+        blockResources: blockResourcesEl.checked,
+        waitSelector: waitSelectorEl.value,
+        waitTimeout: clamp(waitTimeoutEl.value, defaults.waitTimeout, 0, 120),
+
+        concurrency: Math.round(clamp(concurrencyEl.value, defaults.concurrency, 1, 12)),
+        frequency: clamp(frequencyEl.value, defaults.frequency, 0, 60),
+        perDomainDelay: clamp(perDomainDelayEl.value, defaults.perDomainDelay, 0, 120),
+        maxRequests: Math.round(clamp(maxRequestsEl.value, defaults.maxRequests, 0, 50000)),
+        requestTimeout: clamp(requestTimeoutEl.value, defaults.requestTimeout, 2, 240),
+        retryCount: Math.round(clamp(retryCountEl.value, defaults.retryCount, 0, 8)),
+        retryBackoff: Math.round(clamp(retryBackoffEl.value, defaults.retryBackoff, 100, 20000)),
+        botGuardEnabled: botGuardEnabledEl.checked,
+        proxyFallbackEnabled: proxyFallbackEnabledEl.checked,
+        domainChallengeThreshold: Math.round(clamp(domainChallengeThresholdEl.value, defaults.domainChallengeThreshold, 1, 8)),
+        directHardenRetries: Math.round(clamp(directHardenRetriesEl.value, defaults.directHardenRetries, 0, 3)),
+        proxyAttemptsPerUrl: Math.round(clamp(proxyAttemptsPerUrlEl.value, defaults.proxyAttemptsPerUrl, 1, 8)),
+        challengeStatusCodes: challengeStatusCodesEl.value,
+        challengeSignals: challengeSignalsEl.value,
+        proxyStickyPerDomain: proxyStickyPerDomainEl.checked,
+        proxyRotateOnFailure: proxyRotateOnFailureEl.checked,
+        proxyList: proxyListEl.value,
+
+        authHeaders: authHeadersEl.value,
+        authCookies: authCookiesEl.value,
+
+        loginEnabled: loginEnabledEl.checked,
+        loginUrl: loginUrlEl.value,
+        loginUsername: loginUsernameEl.value,
+        loginPassword: loginPasswordEl.value,
+        loginUsernameSelector: loginUsernameSelectorEl.value,
+        loginPasswordSelector: loginPasswordSelectorEl.value,
+        loginSubmitSelector: loginSubmitSelectorEl.value,
+        loginSuccessSelector: loginSuccessSelectorEl.value,
+        loginWaitSeconds: clamp(loginWaitSecondsEl.value, defaults.loginWaitSeconds, 0, 30),
+
+        artifactsEnabled: artifactsEnabledEl.checked,
+        artifactSaveHtml: artifactSaveHtmlEl.checked,
+        artifactSaveScreenshot: artifactSaveScreenshotEl.checked,
+        artifactOutputDir: artifactOutputDirEl.value,
+
+        pickerUrl: pickerUrlEl.value,
+
+        targets: getTargetsRaw(),
+        preset: presetSelect.value || "Default"
+      };
+    }
+
+    function applyInputsState(inputs) {
+      if (!inputs) return;
+
+      if (typeof inputs.urls === "string") urlsEl.value = inputs.urls;
+      if (typeof inputs.headless === "boolean") headlessEl.checked = inputs.headless;
+      if (typeof inputs.renderJs === "boolean") renderJsEl.checked = inputs.renderJs;
+      if (typeof inputs.blockResources === "boolean") blockResourcesEl.checked = inputs.blockResources;
+      if (typeof inputs.waitSelector === "string") waitSelectorEl.value = inputs.waitSelector;
+      if (typeof inputs.waitTimeout === "number") waitTimeoutEl.value = inputs.waitTimeout;
+
+      if (typeof inputs.concurrency === "number") concurrencyEl.value = inputs.concurrency;
+      if (typeof inputs.frequency === "number") frequencyEl.value = inputs.frequency;
+      if (typeof inputs.perDomainDelay === "number") perDomainDelayEl.value = inputs.perDomainDelay;
+      if (typeof inputs.maxRequests === "number") maxRequestsEl.value = inputs.maxRequests;
+      if (typeof inputs.requestTimeout === "number") requestTimeoutEl.value = inputs.requestTimeout;
+      if (typeof inputs.retryCount === "number") retryCountEl.value = inputs.retryCount;
+      if (typeof inputs.retryBackoff === "number") retryBackoffEl.value = inputs.retryBackoff;
+      if (typeof inputs.botGuardEnabled === "boolean") botGuardEnabledEl.checked = inputs.botGuardEnabled;
+      if (typeof inputs.proxyFallbackEnabled === "boolean") proxyFallbackEnabledEl.checked = inputs.proxyFallbackEnabled;
+      if (typeof inputs.domainChallengeThreshold === "number") domainChallengeThresholdEl.value = inputs.domainChallengeThreshold;
+      if (typeof inputs.directHardenRetries === "number") directHardenRetriesEl.value = inputs.directHardenRetries;
+      if (typeof inputs.proxyAttemptsPerUrl === "number") proxyAttemptsPerUrlEl.value = inputs.proxyAttemptsPerUrl;
+      if (typeof inputs.challengeStatusCodes === "string") challengeStatusCodesEl.value = inputs.challengeStatusCodes;
+      if (typeof inputs.challengeSignals === "string") challengeSignalsEl.value = inputs.challengeSignals;
+      if (typeof inputs.proxyStickyPerDomain === "boolean") proxyStickyPerDomainEl.checked = inputs.proxyStickyPerDomain;
+      if (typeof inputs.proxyRotateOnFailure === "boolean") proxyRotateOnFailureEl.checked = inputs.proxyRotateOnFailure;
+      if (typeof inputs.proxyList === "string") proxyListEl.value = inputs.proxyList;
+
+      if (typeof inputs.authHeaders === "string") authHeadersEl.value = inputs.authHeaders;
+      if (typeof inputs.authCookies === "string") authCookiesEl.value = inputs.authCookies;
+
+      if (typeof inputs.loginEnabled === "boolean") loginEnabledEl.checked = inputs.loginEnabled;
+      if (typeof inputs.loginUrl === "string") loginUrlEl.value = inputs.loginUrl;
+      if (typeof inputs.loginUsername === "string") loginUsernameEl.value = inputs.loginUsername;
+      if (typeof inputs.loginPassword === "string") loginPasswordEl.value = inputs.loginPassword;
+      if (typeof inputs.loginUsernameSelector === "string") loginUsernameSelectorEl.value = inputs.loginUsernameSelector;
+      if (typeof inputs.loginPasswordSelector === "string") loginPasswordSelectorEl.value = inputs.loginPasswordSelector;
+      if (typeof inputs.loginSubmitSelector === "string") loginSubmitSelectorEl.value = inputs.loginSubmitSelector;
+      if (typeof inputs.loginSuccessSelector === "string") loginSuccessSelectorEl.value = inputs.loginSuccessSelector;
+      if (typeof inputs.loginWaitSeconds === "number") loginWaitSecondsEl.value = inputs.loginWaitSeconds;
+
+      if (typeof inputs.artifactsEnabled === "boolean") artifactsEnabledEl.checked = inputs.artifactsEnabled;
+      if (typeof inputs.artifactSaveHtml === "boolean") artifactSaveHtmlEl.checked = inputs.artifactSaveHtml;
+      if (typeof inputs.artifactSaveScreenshot === "boolean") artifactSaveScreenshotEl.checked = inputs.artifactSaveScreenshot;
+      if (typeof inputs.artifactOutputDir === "string") artifactOutputDirEl.value = inputs.artifactOutputDir;
+
+      if (typeof inputs.pickerUrl === "string") pickerUrlEl.value = inputs.pickerUrl;
+      if (typeof inputs.runProfile === "string") setActiveRunProfile(inputs.runProfile);
+
+      if (Array.isArray(inputs.targets) && inputs.targets.length) {
+        applyTargets(inputs.targets);
+      } else if (inputs.preset) {
+        presetSelect.value = inputs.preset;
+        loadPreset(inputs.preset);
+      }
+
+      if (inputs.preset) presetSelect.value = inputs.preset;
+
+      syncRenderModeUI();
+      syncLoginUI();
+      syncArtifactsUI();
+      syncProxyFallbackUI();
+    }
+
+    function saveInputsState() {
+      updateSessionState({ inputs: captureInputsState() });
+    }
+
+    function scheduleSaveInputs() {
+      if (saveInputsTimer) clearTimeout(saveInputsTimer);
+      saveInputsTimer = setTimeout(saveInputsState, 220);
+    }
+
+    function saveResultsState(headers, rows, resume) {
+      updateSessionState({
+        results: { headers, rows },
+        resume
+      });
+    }
+
+    function buildRunSignature({ urls, targets, options }) {
+      return JSON.stringify({ urls, targets, options });
     }
 
     function escapeCsv(value) {
       const text = (value ?? "").toString().replace(/\r?\n/g, " ").trim();
-      return '"' + text.replace(/"/g, '""') + '"';
+      return `"${text.replace(/"/g, '""')}"`;
     }
 
     function buildCsv(rows, headers) {
       const lines = [];
       lines.push(headers.map(escapeCsv).join(","));
-      for (const row of rows) {
-        lines.push(headers.map(h => escapeCsv(row[h])).join(","));
-      }
+      rows.forEach((row) => {
+        lines.push(headers.map((header) => escapeCsv(row[header])).join(","));
+      });
       return lines.join("\n");
     }
 
@@ -1070,65 +3122,60 @@
       const sanitize = (value) => (value ?? "").toString().replace(/\t/g, " ").replace(/\r?\n/g, " ").trim();
       const lines = [];
       lines.push(headers.map(sanitize).join("\t"));
-      for (const row of rows) {
-        lines.push(headers.map(h => sanitize(row[h])).join("\t"));
-      }
+      rows.forEach((row) => {
+        lines.push(headers.map((header) => sanitize(row[header])).join("\t"));
+      });
       return lines.join("\n");
-    }
-
-    function setButtonsEnabled(enabled) {
-      copyCsvBtn.disabled = !enabled;
-      downloadCsvBtn.disabled = !enabled;
     }
 
     function renderTable(headers, rows) {
       resultsTable.innerHTML = "";
       if (!rows.length) return;
-      const colgroup = document.createElement("colgroup");
-      const extraCols = headers.length - 1;
-      headers.forEach((_, idx) => {
-        const col = document.createElement("col");
-        if (idx === 0) {
-          col.style.minWidth = extraCols > 0 ? "500px" : "100%";
-        } else {
-          col.style.minWidth = "200px";
-        }
-        colgroup.appendChild(col);
-      });
-      resultsTable.appendChild(colgroup);
+
       const thead = document.createElement("thead");
       const headRow = document.createElement("tr");
-      headers.forEach(h => {
+      headers.forEach((header) => {
         const th = document.createElement("th");
-        th.textContent = h;
+        th.textContent = header;
         headRow.appendChild(th);
       });
       thead.appendChild(headRow);
       resultsTable.appendChild(thead);
 
       const tbody = document.createElement("tbody");
-      rows.forEach(row => {
+      rows.forEach((row) => {
         const tr = document.createElement("tr");
-        headers.forEach((h, idx) => {
+        headers.forEach((header, idx) => {
           const td = document.createElement("td");
-          if (idx === 0 && row[h]) {
+          const value = row[header] || "";
+
+          if (idx === 0 && value) {
             const link = document.createElement("a");
-            link.className = "cell";
-            link.href = row[h];
-            link.textContent = row[h];
+            link.className = "cell cell-link";
+            link.href = value;
+            link.textContent = value;
             link.addEventListener("click", (event) => {
               event.preventDefault();
-              if (window.scraper?.openExternal) {
-                window.scraper.openExternal(row[h]);
-              }
+              window.scraper?.openExternal?.(value);
+            });
+            td.appendChild(link);
+          } else if (header === "_artifact_dir" && value) {
+            const link = document.createElement("a");
+            link.className = "cell cell-link";
+            link.href = "#";
+            link.textContent = value;
+            link.addEventListener("click", async (event) => {
+              event.preventDefault();
+              await window.scraper?.openPath?.(value);
             });
             td.appendChild(link);
           } else {
             const cell = document.createElement("div");
             cell.className = "cell";
-            cell.textContent = row[h] || "";
+            cell.textContent = value;
             td.appendChild(cell);
           }
+
           tr.appendChild(td);
         });
         tbody.appendChild(tr);
@@ -1142,22 +3189,23 @@
 
     function parseHreflang(doc, selector) {
       const nodes = Array.from(doc.querySelectorAll(selector || 'link[rel="alternate"][hreflang]'));
-      return nodes.map(l => `${l.getAttribute("hreflang")}:${l.getAttribute("href") || ""}`)
-        .join(" | ");
+      return nodes.map((l) => `${l.getAttribute("hreflang")}:${l.getAttribute("href") || ""}`).join(" | ");
     }
 
     function parseJsonLd(doc, selector) {
       const scripts = Array.from(doc.querySelectorAll(selector || 'script[type="application/ld+json"]'));
       if (!scripts.length) return "";
-      const pieces = scripts.map(s => {
-        const raw = (s.textContent || "").trim();
-        if (!raw) return "";
-        try {
-          return JSON.stringify(JSON.parse(raw));
-        } catch {
-          return raw.replace(/\s+/g, " ");
-        }
-      }).filter(Boolean);
+      const pieces = scripts
+        .map((script) => {
+          const raw = (script.textContent || "").trim();
+          if (!raw) return "";
+          try {
+            return JSON.stringify(JSON.parse(raw));
+          } catch {
+            return raw.replace(/\s+/g, " ");
+          }
+        })
+        .filter(Boolean);
       return pieces.join(" | ");
     }
 
@@ -1185,23 +3233,20 @@
       } catch {
         return "";
       }
+
       switch (target.mode) {
         case "text":
-          return nodes.map(textContent).filter(Boolean).join(", ");
         case "textAll":
           return nodes.map(textContent).filter(Boolean).join(", ");
         case "innerHTML":
-          return nodes.map(n => (n ? n.innerHTML : "")).filter(Boolean).join(", ");
         case "innerHTMLAll":
-          return nodes.map(n => (n ? n.innerHTML : "")).filter(Boolean).join(", ");
+          return nodes.map((n) => n?.innerHTML || "").filter(Boolean).join(", ");
         case "outerHTML":
-          return nodes.map(n => (n ? n.outerHTML : "")).filter(Boolean).join(", ");
         case "outerHTMLAll":
-          return nodes.map(n => (n ? n.outerHTML : "")).filter(Boolean).join(", ");
+          return nodes.map((n) => n?.outerHTML || "").filter(Boolean).join(", ");
         case "attr":
-          return nodes.map(n => n.getAttribute(target.attr || "") || "").filter(Boolean).join(", ");
         case "attrAll":
-          return nodes.map(n => n.getAttribute(target.attr || "") || "").filter(Boolean).join(", ");
+          return nodes.map((n) => n.getAttribute(target.attr || "") || "").filter(Boolean).join(", ");
         case "hreflang":
           return parseHreflang(doc, target.selector);
         case "jsonld":
@@ -1211,30 +3256,22 @@
       }
     }
 
-    function updateProgressUI(completed, total, remainingMs) {
-      progressTextEl.textContent = `${completed} / ${total}`;
-      if (remainingMs !== undefined) {
-        const seconds = Math.ceil(remainingMs / 1000);
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        etaTextEl.textContent = mins > 0 ? `ETA: ${mins}m ${secs}s` : `ETA: ${secs}s`;
-      } else {
-        etaTextEl.textContent = "ETA: --";
-      }
-    }
-
     function appendResultRow(result, targets) {
-      const row = { "URL": result.url };
-      if (!result.html) {
-        targets.forEach(t => {
-          row[t.label] = "";
-        });
-        return row;
-      }
-      const doc = new DOMParser().parseFromString(result.html, "text/html");
-      targets.forEach(target => {
-        row[target.label] = extractTargetValue(doc, target, result.url);
+      const row = { URL: result.url || "" };
+      const doc = result.html ? new DOMParser().parseFromString(result.html, "text/html") : null;
+
+      targets.forEach((target) => {
+        row[target.label] = doc ? extractTargetValue(doc, target, result.url) : "";
       });
+
+      row._status = result.status || "";
+      row._final_url = result.finalUrl || result.url || "";
+      row._error_code = result.errorCode || "";
+      row._error = result.error || "";
+      row._attempts = Number.isFinite(Number(result.attempts)) ? String(result.attempts) : "";
+      row._redirect_chain = Array.isArray(result.redirectChain) ? result.redirectChain.join(" -> ") : "";
+      row._artifact_dir = result.artifactPath || "";
+
       return row;
     }
 
@@ -1243,8 +3280,10 @@
         if (!currentHeaders.length || !currentRows.length) return;
         const tsv = buildTsv(currentRows, currentHeaders);
         await navigator.clipboard.writeText(tsv);
+        showToast("Table copied");
         log("Table copied to clipboard.");
       };
+
       downloadCsvBtn.onclick = () => {
         if (!currentHeaders.length || !currentRows.length) return;
         const csv = buildCsv(currentRows, currentHeaders);
@@ -1255,7 +3294,103 @@
         a.download = "scrape-results.csv";
         a.click();
         URL.revokeObjectURL(url);
+        showToast("CSV download started");
       };
+    }
+
+    async function startPicker() {
+      if (pickerRunning) return;
+      if (!window.scraper?.startPicker) {
+        log("Selector picker is only available in the desktop app.");
+        return;
+      }
+
+      const pickerUrl = pickerUrlEl.value.trim() || getNormalizedUrls()[0] || "";
+      if (!pickerUrl) {
+        log("Add at least one URL or set a Picker URL.");
+        return;
+      }
+
+      let auth;
+      try {
+        auth = buildAuthPayload();
+      } catch (err) {
+        log(`Picker auth config error: ${err.message || err}`);
+        return;
+      }
+
+      try {
+        const response = await window.scraper.startPicker({
+          url: pickerUrl,
+          requestTimeoutSeconds: clamp(requestTimeoutEl.value, defaults.requestTimeout, 2, 240),
+          auth
+        });
+        if (response?.ok) {
+          setPickerState(true);
+          showToast("Picker started");
+        }
+      } catch (err) {
+        log(`Picker start failed: ${err.message || err}`);
+      }
+    }
+
+    async function stopPicker() {
+      if (!window.scraper?.stopPicker) return;
+      try {
+        await window.scraper.stopPicker();
+      } catch {
+        // ignore
+      }
+      setPickerState(false);
+    }
+
+    function applyPickedSelector(payload) {
+      if (!payload || payload.type === "closed") {
+        setPickerState(false);
+        return;
+      }
+
+      const selector = (payload.selector || "").trim();
+      if (!selector) return;
+
+      let row = activeTargetRow;
+      if (!row) {
+        if (!targetsEl.querySelector(".row")) {
+          createTargetRow({ label: "picked_selector", selector, mode: "text", attr: "" });
+        }
+        row = targetsEl.querySelector(".row");
+      }
+      if (!row) return;
+
+      setActiveTargetRow(row);
+      const selectorInput = row.querySelector(".target-selector");
+      const modeInput = row.querySelector(".target-mode");
+      const attrInput = row.querySelector(".target-attr");
+
+      selectorInput.value = selector;
+      selectorInput.dispatchEvent(new Event("input", { bubbles: true }));
+
+      if ((modeInput.value === "attr" || modeInput.value === "attrAll") && !attrInput.value) {
+        const attrs = payload.attrs || {};
+        const candidate = attrs.href
+          ? "href"
+          : attrs.src
+            ? "src"
+            : attrs.content
+              ? "content"
+              : attrs.value
+                ? "value"
+                : attrs.alt
+                  ? "alt"
+                  : "";
+        if (candidate) {
+          attrInput.value = candidate;
+          attrInput.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      }
+
+      showToast("Selector applied");
+      log(`Selector picked: ${selector}`);
     }
 
     function resetToDefaults() {
@@ -1264,16 +3399,58 @@
       writePresetStore(store);
       renderPresetOptions(store, "Default");
 
-      urlsEl.value = [
-        "https://example.com",
-        "https://example.org"
-      ].join("\n");
+      urlsEl.value = ["https://example.com", "https://example.org"].join("\n");
+
       headlessEl.checked = true;
       renderJsEl.checked = true;
       blockResourcesEl.checked = true;
       waitSelectorEl.value = "";
-      waitTimeoutEl.value = 15;
-      frequencyEl.value = defaultFrequency;
+      waitTimeoutEl.value = defaults.waitTimeout;
+
+      concurrencyEl.value = defaults.concurrency;
+      frequencyEl.value = defaults.frequency;
+      perDomainDelayEl.value = defaults.perDomainDelay;
+      maxRequestsEl.value = defaults.maxRequests;
+      requestTimeoutEl.value = defaults.requestTimeout;
+      retryCountEl.value = defaults.retryCount;
+      retryBackoffEl.value = defaults.retryBackoff;
+      botGuardEnabledEl.checked = defaults.botGuardEnabled;
+      proxyFallbackEnabledEl.checked = defaults.proxyFallbackEnabled;
+      domainChallengeThresholdEl.value = defaults.domainChallengeThreshold;
+      directHardenRetriesEl.value = defaults.directHardenRetries;
+      proxyAttemptsPerUrlEl.value = defaults.proxyAttemptsPerUrl;
+      challengeStatusCodesEl.value = defaults.challengeStatusCodes;
+      challengeSignalsEl.value = defaults.challengeSignals;
+      proxyStickyPerDomainEl.checked = defaults.proxyStickyPerDomain;
+      proxyRotateOnFailureEl.checked = defaults.proxyRotateOnFailure;
+      proxyListEl.value = "";
+
+      authHeadersEl.value = "";
+      authCookiesEl.value = "";
+
+      loginEnabledEl.checked = false;
+      loginUrlEl.value = "";
+      loginUsernameEl.value = "";
+      loginPasswordEl.value = "";
+      loginUsernameSelectorEl.value = "";
+      loginPasswordSelectorEl.value = "";
+      loginSubmitSelectorEl.value = "";
+      loginSuccessSelectorEl.value = "";
+      loginWaitSecondsEl.value = defaults.loginWaitSeconds;
+
+      artifactsEnabledEl.checked = defaults.artifactsEnabled;
+      artifactSaveHtmlEl.checked = defaults.artifactSaveHtml;
+      artifactSaveScreenshotEl.checked = defaults.artifactSaveScreenshot;
+      artifactOutputDirEl.value = "";
+      lastArtifactDir = "";
+      pickerUrlEl.value = "";
+
+      setPickerState(false);
+      setActiveRunProfile("balanced");
+      syncRenderModeUI();
+      syncLoginUI();
+      syncArtifactsUI();
+      syncProxyFallbackUI();
 
       presetSelect.value = "Default";
       const defaultPreset = store.presets?.Default || defaultTargets;
@@ -1282,9 +3459,10 @@
       resultsTable.innerHTML = "";
       currentRows = [];
       currentHeaders = [];
-      clearLog();
       setButtonsEnabled(false);
-      syncRenderModeUI();
+      clearLog();
+      resetRunMetrics(0);
+      setRunState("idle", "Ready to run.");
 
       clearSessionState();
       saveInputsState();
@@ -1292,32 +3470,76 @@
     }
 
     async function scrape() {
+      setActiveTab("results");
+      if (runLogDetailsEl) runLogDetailsEl.open = true;
       clearLog();
 
-      const urls = urlsEl.value.split(/\r?\n/).map(u => u.trim()).filter(Boolean);
+      const urls = getEffectiveUrls();
       if (!urls.length) {
         log("Add at least one URL.");
+        setActiveTab("target");
         return;
       }
 
-      if (!window.scraper) {
-        log("This app must be opened via the desktop app (Electron).");
+      if (!window.scraper?.scrapeUrls) {
+        log("This app must run in the desktop shell (Electron).");
         return;
       }
 
-      const frequencySeconds = Math.max(0, Number(frequencyEl.value || defaultFrequency));
+      let auth;
+      try {
+        auth = buildAuthPayload();
+      } catch (err) {
+        log(`Auth configuration error: ${err.message || err}`);
+        return;
+      }
+
+      if (proxyFallbackEnabledEl.checked && !(proxyListEl.value || "").trim()) {
+        log("Proxy fallback is enabled but Proxy List is empty. Proxies will not be used until you add endpoints.");
+      }
+
       const customTargets = getTargets();
-      const headers = ["URL", ...customTargets.map(t => t.label)];
+      const headers = ["URL", ...customTargets.map((t) => t.label), ...metadataHeaders];
+
       const options = {
         headless: headlessEl.checked,
-        renderJs: renderJsEl.checked,
+        rawHtmlOnly: !renderJsEl.checked,
         blockResources: blockResourcesEl.checked,
         waitForSelector: waitSelectorEl.value.trim(),
-        waitTimeoutSeconds: Number.isFinite(Number(waitTimeoutEl.value)) ? Number(waitTimeoutEl.value) : 15,
-        delaySeconds: frequencySeconds
-      };
-      const signature = buildRunSignature({ urls, targets: customTargets, options });
+        waitTimeoutSeconds: clamp(waitTimeoutEl.value, defaults.waitTimeout, 0, 120),
 
+        concurrency: Math.round(clamp(concurrencyEl.value, defaults.concurrency, 1, 12)),
+        delaySeconds: clamp(frequencyEl.value, defaults.frequency, 0, 60),
+        perDomainDelaySeconds: clamp(perDomainDelayEl.value, defaults.perDomainDelay, 0, 120),
+        maxRequests: Math.round(clamp(maxRequestsEl.value, defaults.maxRequests, 0, 50000)),
+        requestTimeoutSeconds: clamp(requestTimeoutEl.value, defaults.requestTimeout, 2, 240),
+        retryCount: Math.round(clamp(retryCountEl.value, defaults.retryCount, 0, 8)),
+        retryBackoffMs: Math.round(clamp(retryBackoffEl.value, defaults.retryBackoff, 100, 20000)),
+        botGuard: {
+          enabled: botGuardEnabledEl.checked,
+          challengeStatusCodes: challengeStatusCodesEl.value,
+          challengeSignals: challengeSignalsEl.value,
+          directHardenRetries: Math.round(clamp(directHardenRetriesEl.value, defaults.directHardenRetries, 0, 3))
+        },
+        proxyFallback: {
+          enabled: proxyFallbackEnabledEl.checked,
+          proxies: proxyListEl.value,
+          domainChallengeThreshold: Math.round(clamp(domainChallengeThresholdEl.value, defaults.domainChallengeThreshold, 1, 8)),
+          maxAttemptsPerUrl: Math.round(clamp(proxyAttemptsPerUrlEl.value, defaults.proxyAttemptsPerUrl, 1, 8)),
+          stickyPerDomain: proxyStickyPerDomainEl.checked,
+          rotateOnFailure: proxyRotateOnFailureEl.checked
+        },
+
+        auth,
+        artifacts: {
+          enabled: artifactsEnabledEl.checked,
+          outputDir: artifactOutputDirEl.value.trim(),
+          saveHtml: artifactSaveHtmlEl.checked,
+          saveScreenshot: artifactSaveScreenshotEl.checked
+        }
+      };
+
+      const signature = buildRunSignature({ urls, targets: customTargets, options });
       const saved = readSessionState();
       const savedRows = Array.isArray(saved?.results?.rows) ? saved.results.rows : [];
       const savedResume = saved?.resume;
@@ -1325,6 +3547,7 @@
       const resumeIndex = Number.isFinite(resumeIndexRaw)
         ? Math.min(savedRows.length, Math.max(0, resumeIndexRaw))
         : 0;
+
       const canResume = !!savedResume
         && savedResume.signature === signature
         && Array.isArray(savedResume.urls)
@@ -1348,6 +3571,7 @@
       }
 
       saveInputsState();
+
       const resumeState = {
         signature,
         urls,
@@ -1356,14 +3580,26 @@
         options,
         targets: customTargets
       };
+
       saveResultsState(currentHeaders, currentRows, resumeState);
-      updateProgressUI(resumeOffset, urls.length);
+      updateProgressUI(resumeOffset, urls.length, 0);
 
       const remainingUrls = urls.slice(resumeOffset);
       const baseRows = currentRows.length;
       let addedThisRun = 0;
+      resetRunMetrics(urls.length);
+      runMetrics.done = resumeOffset;
+      if (currentRows.length) {
+        currentRows.forEach((row) => {
+          if (row._error || row._error_code) runMetrics.failed += 1;
+          else runMetrics.success += 1;
+        });
+      }
+      updateRunCounters();
+      setRunState("running", `Running ${urls.length} URL${urls.length === 1 ? "" : "s"}...`);
 
       scrapeBtn.disabled = true;
+
       window.scraper.onStatus((data) => {
         if (data?.type === "progress") {
           const completed = (data.completed ?? 0) + resumeOffset;
@@ -1371,6 +3607,11 @@
           return;
         }
         if (data?.message) log(data.message);
+        const msg = String(data?.message || "").toLowerCase();
+        if (msg.includes("stopped")) {
+          setRunState("stopped", `Stopped at ${runMetrics.done}/${runMetrics.total}.`);
+          showToast("Run stopped");
+        }
       });
 
       window.scraper.onResult((data) => {
@@ -1378,8 +3619,18 @@
         const row = appendResultRow(data.result, customTargets);
         currentRows.push(row);
         addedThisRun += 1;
+        if (row._error || row._error_code) runMetrics.failed += 1;
+        else runMetrics.success += 1;
+        updateRunCounters();
+
+        if (data.result.artifactPath) {
+          lastArtifactDir = data.result.artifactPath;
+          syncArtifactsUI();
+        }
+
         renderTable(currentHeaders, currentRows);
         setButtonsEnabled(true);
+
         const nextIndex = baseRows + addedThisRun;
         saveResultsState(currentHeaders, currentRows, {
           ...resumeState,
@@ -1391,6 +3642,8 @@
         if (!remainingUrls.length) {
           log("All URLs already scraped.");
           updateProgressUI(urls.length, urls.length, 0);
+          setRunState("completed", `Completed ${runMetrics.success} success, ${runMetrics.failed} failed.`);
+          showToast("Run already complete");
           saveResultsState(currentHeaders, currentRows, {
             ...resumeState,
             nextIndex: urls.length
@@ -1400,12 +3653,7 @@
 
         const results = await window.scraper.scrapeUrls({
           urls: remainingUrls,
-          delaySeconds: frequencySeconds,
-          headless: headlessEl.checked,
-          rawHtmlOnly: !renderJsEl.checked,
-          blockResources: blockResourcesEl.checked,
-          waitForSelector: waitSelectorEl.value.trim(),
-          waitTimeoutSeconds: Number.isFinite(Number(waitTimeoutEl.value)) ? Number(waitTimeoutEl.value) : 15
+          ...options
         });
 
         if (!Array.isArray(results)) {
@@ -1419,92 +3667,266 @@
           missing.forEach((result) => {
             const row = appendResultRow(result, customTargets);
             currentRows.push(row);
+            if (result.artifactPath) {
+              lastArtifactDir = result.artifactPath;
+            }
           });
           renderTable(currentHeaders, currentRows);
           setButtonsEnabled(currentRows.length > 0);
+          syncArtifactsUI();
         }
 
         saveResultsState(currentHeaders, currentRows, {
           ...resumeState,
           nextIndex: Math.min(urls.length, resumeOffset + results.length)
         });
+        const hasFailures = runMetrics.failed > 0;
+        setRunState(
+          hasFailures ? "failed" : "completed",
+          hasFailures
+            ? `Completed with issues: ${runMetrics.success} success, ${runMetrics.failed} failed.`
+            : `Completed ${runMetrics.success}/${runMetrics.total} successfully.`
+        );
+        showToast(hasFailures ? "Run completed with issues" : "Run completed");
+        etaTextEl.textContent = "0s";
       } catch (err) {
         log(`Scrape failed: ${err?.message || err}`);
+        setRunState("failed", `Run failed: ${err?.message || err}`);
+        showToast("Run failed");
       } finally {
         scrapeBtn.disabled = false;
       }
     }
 
     scrapeBtn.addEventListener("click", scrape);
+
+    if (tabTargetEl) tabTargetEl.addEventListener("click", () => setActiveTab("target"));
+    if (tabSettingsEl) tabSettingsEl.addEventListener("click", () => setActiveTab("settings"));
+    if (tabResultsEl) tabResultsEl.addEventListener("click", () => setActiveTab("results"));
+
     stopScrapeBtn.addEventListener("click", async () => {
       if (window.scraper?.stopScrape) {
         await window.scraper.stopScrape();
         log("Stop requested.");
+        setRunState("stopped", `Stop requested at ${runMetrics.done}/${runMetrics.total}.`);
       }
     });
-    addTargetBtn.addEventListener("click", () => {
-      createTargetRow();
-      scheduleSaveInputs();
-    });
+
     clearBtn.addEventListener("click", () => {
       resultsTable.innerHTML = "";
       currentRows = [];
       currentHeaders = [];
       setButtonsEnabled(false);
       clearLog();
+      resetRunMetrics(0);
+      setRunState("idle", "Ready to run.");
       scrapeBtn.disabled = false;
       updateSessionState({ results: { headers: [], rows: [] }, resume: null });
+      showToast("Results cleared");
     });
+
     resetDefaultsBtn.addEventListener("click", () => {
       resetToDefaults();
+      showToast("Defaults restored");
     });
-    document.addEventListener("click", (event) => {
-      const btn = event.target.closest("button");
-      if (!btn) return;
-      const id = btn.id;
-      const messages = {
-        scrape: "Scrape started",
-        clear: "Results cleared",
-        addTarget: "Target added",
-        copyCsv: "Table copied",
-        downloadCsv: "CSV download started",
-        savePreset: "Preset saved",
-        deletePreset: "Preset deleted",
-        exportPreset: "Presets exported",
-        importPreset: "Select a preset file",
-        stopScrape: "Stop requested",
-        resetDefaults: "Defaults restored"
-      };
-      if (messages[id]) showToast(messages[id]);
+
+    addTargetBtn.addEventListener("click", () => {
+      createTargetRow();
+      const newest = targetsEl.lastElementChild;
+      if (newest) setActiveTargetRow(newest);
+      scheduleSaveInputs();
+      showToast("Target added");
     });
-    urlsEl.addEventListener("input", scheduleSaveInputs);
-    headlessEl.addEventListener("change", scheduleSaveInputs);
-    blockResourcesEl.addEventListener("change", scheduleSaveInputs);
-    waitSelectorEl.addEventListener("input", scheduleSaveInputs);
-    waitTimeoutEl.addEventListener("input", scheduleSaveInputs);
-    frequencyEl.addEventListener("input", scheduleSaveInputs);
+
+    runProfileBtnEls.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const profile = btn.dataset.runProfile;
+        if (!profile) return;
+        applyRunProfile(profile);
+      });
+    });
+
+    startPickerBtn.addEventListener("click", startPicker);
+    stopPickerBtn.addEventListener("click", stopPicker);
+
+    openArtifactDirBtn.addEventListener("click", async () => {
+      const target = lastArtifactDir || artifactOutputDirEl.value.trim();
+      if (!target || !window.scraper?.openPath) return;
+      await window.scraper.openPath(target);
+    });
+
+    renderJsEl.addEventListener("change", () => {
+      syncRenderModeUI();
+      scheduleSaveInputs();
+    });
+
+    loginEnabledEl.addEventListener("change", () => {
+      syncLoginUI();
+      scheduleSaveInputs();
+    });
+
+    artifactsEnabledEl.addEventListener("change", () => {
+      syncArtifactsUI();
+      scheduleSaveInputs();
+    });
+
+    botGuardEnabledEl.addEventListener("change", () => {
+      syncBotGuardUI();
+      syncProxyFallbackUI();
+      scheduleSaveInputs();
+    });
+
+    proxyFallbackEnabledEl.addEventListener("change", () => {
+      syncProxyFallbackUI();
+      scheduleSaveInputs();
+    });
+
+    proxyListEl.addEventListener("input", () => {
+      syncProxyFallbackUI();
+    });
+
+    artifactOutputDirEl.addEventListener("input", () => {
+      syncArtifactsUI();
+    });
+
+    [
+      headlessEl,
+      renderJsEl,
+      blockResourcesEl,
+      waitSelectorEl,
+      waitTimeoutEl,
+      concurrencyEl,
+      frequencyEl,
+      perDomainDelayEl,
+      maxRequestsEl,
+      requestTimeoutEl,
+      retryCountEl,
+      retryBackoffEl,
+      botGuardEnabledEl,
+      proxyFallbackEnabledEl,
+      domainChallengeThresholdEl,
+      directHardenRetriesEl,
+      proxyAttemptsPerUrlEl,
+      challengeStatusCodesEl,
+      challengeSignalsEl,
+      proxyStickyPerDomainEl,
+      proxyRotateOnFailureEl,
+      proxyListEl,
+      artifactsEnabledEl,
+      artifactSaveHtmlEl,
+      artifactSaveScreenshotEl,
+      artifactOutputDirEl,
+      authHeadersEl,
+      authCookiesEl,
+      loginEnabledEl,
+      loginUrlEl,
+      loginUsernameEl,
+      loginPasswordEl,
+      loginUsernameSelectorEl,
+      loginPasswordSelectorEl,
+      loginSubmitSelectorEl,
+      loginSuccessSelectorEl,
+      loginWaitSecondsEl
+    ].forEach((element) => {
+      const evt = element.type === "checkbox" ? "change" : "input";
+      element.addEventListener(evt, () => {
+        if (activeRunProfile !== "custom") {
+          setActiveRunProfile("custom");
+        }
+      });
+    });
+
+    [
+      urlsEl,
+      headlessEl,
+      blockResourcesEl,
+      waitSelectorEl,
+      waitTimeoutEl,
+      concurrencyEl,
+      frequencyEl,
+      perDomainDelayEl,
+      maxRequestsEl,
+      requestTimeoutEl,
+      retryCountEl,
+      retryBackoffEl,
+      botGuardEnabledEl,
+      proxyFallbackEnabledEl,
+      domainChallengeThresholdEl,
+      directHardenRetriesEl,
+      proxyAttemptsPerUrlEl,
+      challengeStatusCodesEl,
+      challengeSignalsEl,
+      proxyStickyPerDomainEl,
+      proxyRotateOnFailureEl,
+      proxyListEl,
+      authHeadersEl,
+      authCookiesEl,
+      loginUrlEl,
+      loginUsernameEl,
+      loginPasswordEl,
+      loginUsernameSelectorEl,
+      loginPasswordSelectorEl,
+      loginSubmitSelectorEl,
+      loginSuccessSelectorEl,
+      loginWaitSecondsEl,
+      artifactSaveHtmlEl,
+      artifactSaveScreenshotEl,
+      artifactOutputDirEl,
+      pickerUrlEl
+    ].forEach((element) => {
+      const evt = element.type === "checkbox" ? "change" : "input";
+      element.addEventListener(evt, scheduleSaveInputs);
+    });
+
     presetSelect.addEventListener("change", () => {
       loadPreset(presetSelect.value);
     });
+
     savePresetBtn.addEventListener("click", () => {
       const name = presetNameInput.value || presetSelect.value;
       savePreset(name);
       presetNameInput.value = "";
+      showToast("Preset saved");
     });
+
     deletePresetBtn.addEventListener("click", () => {
       const name = presetSelect.value;
       if (name === "Default") return;
       const ok = confirm(`Delete preset \"${name}\"?`);
-      if (ok) deletePreset(name);
+      if (ok) {
+        deletePreset(name);
+        showToast("Preset deleted");
+      }
     });
+
     exportPresetBtn.addEventListener("click", exportPresets);
-    importPresetBtn.addEventListener("click", () => importPresetFile.click());
+
+    importPresetBtn.addEventListener("click", () => {
+      importPresetFile.click();
+    });
+
     importPresetFile.addEventListener("change", (event) => {
       const file = event.target.files && event.target.files[0];
       importPresetsFromFile(file);
       importPresetFile.value = "";
     });
+
     bindExportButtons();
+
+    if (window.scraper?.onPickerStatus) {
+      window.scraper.onPickerStatus((data) => {
+        if (data?.message) log(data.message);
+        const msg = String(data?.message || "").toLowerCase();
+        if (msg.includes("started")) setPickerState(true);
+        if (msg.includes("stopped") || msg.includes("not running")) setPickerState(false);
+      });
+    }
+
+    if (window.scraper?.onPickerSelection) {
+      window.scraper.onPickerSelection((data) => {
+        applyPickedSelector(data || {});
+      });
+    }
 
     const store = ensurePresetStore();
     renderPresetOptions(store, store.last || "Default");
@@ -1516,30 +3938,55 @@
         loadPreset(presetSelect.value || store.last || "Default");
       }
     } else {
-      urlsEl.value = [
-        "https://example.com",
-        "https://example.org"
-      ].join("\n");
-      frequencyEl.value = defaultFrequency;
-      presetSelect.value = store.last || "Default";
+      resetToDefaults();
+      const freshStore = ensurePresetStore();
+      renderPresetOptions(freshStore, freshStore.last || "Default");
+      presetSelect.value = freshStore.last || "Default";
       loadPreset(presetSelect.value);
     }
 
     if (Array.isArray(session?.results?.rows) && session.results.rows.length) {
-      currentHeaders = Array.isArray(session.results.headers)
-        ? session.results.headers
-        : [];
+      currentHeaders = Array.isArray(session.results.headers) ? session.results.headers : [];
       currentRows = session.results.rows;
       if (!currentHeaders.length && currentRows.length) {
-        const keys = Object.keys(currentRows[0] || {});
-        currentHeaders = keys.length ? keys : [];
+        currentHeaders = Object.keys(currentRows[0] || {});
       }
       if (currentHeaders.length) {
         renderTable(currentHeaders, currentRows);
         setButtonsEnabled(true);
       }
+      const fromRows = currentRows.find((row) => row._artifact_dir);
+      if (fromRows) {
+        lastArtifactDir = fromRows._artifact_dir;
+      }
     }
 
+    syncRenderModeUI();
+    syncLoginUI();
+    syncArtifactsUI();
+    syncProxyFallbackUI();
+    setActiveTab("target");
+    setPickerState(false);
+    resetRunMetrics(currentRows.length || 0);
+    if (currentRows.length) {
+      currentRows.forEach((row) => {
+        if (row._error || row._error_code) runMetrics.failed += 1;
+        else runMetrics.success += 1;
+      });
+      runMetrics.done = currentRows.length;
+      updateRunCounters();
+      progressFillEl.style.width = "100%";
+      setRunState(
+        runMetrics.failed > 0 ? "failed" : "completed",
+        runMetrics.failed > 0
+          ? `Last run had ${runMetrics.failed} failed row(s).`
+          : "Last run completed successfully."
+      );
+      progressTextEl.textContent = `${currentRows.length} / ${currentRows.length}`;
+      etaTextEl.textContent = "0s";
+    } else {
+      setRunState("idle", "Ready to run.");
+    }
     saveInputsState();
   </script>
 </body>
