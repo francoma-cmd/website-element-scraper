@@ -1,4 +1,4 @@
-name: Build Windows App
+name: Build Apps
 
 permissions:
   contents: write
@@ -75,4 +75,63 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-dist
+          path: dist/
+
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: "0"
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: "0"
+        run: npx playwright install chromium
+
+      - name: Build macOS dmg
+        run: npm run dist -- --publish never
+
+      - name: Determine release tag
+        id: release_tag
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" && -n "${GITHUB_REF_NAME}" ]]; then
+            echo "tag=${GITHUB_REF_NAME}" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          if [[ -n "${{ inputs.tag }}" ]]; then
+            echo "tag=${{ inputs.tag }}" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          echo "tag=" >> "${GITHUB_OUTPUT}"
+
+      - name: Upload to GitHub Release
+        if: ${{ steps.release_tag.outputs.tag != '' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          prerelease: true
+          files: |
+            dist/*.dmg
+            dist/*.zip
+            dist/*.yml
+            dist/*.blockmap
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-dist
           path: dist/

@@ -1,6 +1,6 @@
 {
   "name": "website-element-scraper",
-  "version": "1.0.1-beta.2",
+  "version": "1.0.1-beta.3",
   "private": true,
   "main": "main.js",
   "description": "Desktop app to scrape website element details and export CSV.",
@@ -21,6 +21,7 @@
     "appId": "com.scrape.desktop",
     "productName": "Website Element Scraper",
     "asar": true,
+    "afterPack": "scripts/afterPack-mac-adhoc-sign.js",
     "files": [
       "index.html",
       "main.js",
