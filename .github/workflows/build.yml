@@ -35,7 +35,9 @@ jobs:
         run: npx playwright install chromium
 
       - name: Build Windows installer
-        run: npm run dist
+        # Prevent electron-builder from attempting to auto-publish (it requires GH_TOKEN).
+        # We upload assets to the GitHub Release in a later step instead.
+        run: npm run dist -- --publish never
 
       - name: Determine release tag
         id: release_tag
