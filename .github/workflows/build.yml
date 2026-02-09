@@ -68,7 +68,7 @@ jobs:
             dist/*.exe
             dist/*.msi
             dist/*.zip
-            dist/*.yml
+            dist/latest*.yml
             dist/*.blockmap
 
       - name: Upload artifacts
@@ -127,7 +127,7 @@ jobs:
           files: |
             dist/*.dmg
             dist/*.zip
-            dist/*.yml
+            dist/latest*.yml
             dist/*.blockmap
 
       - name: Upload artifacts
