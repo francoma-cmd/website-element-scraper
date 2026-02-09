@@ -1,6 +1,22 @@
 const path = require("path");
 const fs = require("fs/promises");
 const { app, BrowserWindow, ipcMain, shell } = require("electron");
+
+// Ensure packaged apps use the browsers bundled in the distribution rather than
+// per-user caches (~/Library/Caches/ms-playwright on macOS). This must run
+// before requiring Playwright.
+if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
+  if (app.isPackaged) {
+    process.env.PLAYWRIGHT_BROWSERS_PATH = path.join(
+      process.resourcesPath,
+      "playwright-browsers"
+    );
+  } else {
+    // In dev, keep browsers inside node_modules (installed by postinstall).
+    process.env.PLAYWRIGHT_BROWSERS_PATH = "0";
+  }
+}
+
 const { chromium } = require("playwright");
 
 const DEFAULT_USER_AGENT =
